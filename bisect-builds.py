@@ -1019,7 +1019,7 @@ def convertChromeVersionToBuild(version):
     try:
       data = json.loads(response.read())
       build = int(data['chromium_base_position'])
-      print '%s == %s' % (version, build)
+      print 'Chrome version %s == Chromium build %s' % (version, build)
       return build
     except ValueError:
       print 'ValueError for JSON URL: %s' % json_url
@@ -1133,17 +1133,24 @@ def main():
     machine = platform.machine()
     system = platform.system()
     if system == 'Linux':
+      print 'Running on Linux'
       if machine == 'x86_64':
+        print '64-bit'
         opts.archive = 'linux64'
       elif machine == 'i386' or machine == 'i686':
+        print '32-bit'
         opts.archive = 'linux'
     elif system == 'Darwin':
-      opts.archive == 'mac64'
+      print 'Running on MacOS 64-bit'
+      opts.archive = 'mac64'
     elif system == 'Windows':
-      if machine == 'x86_64':
-        opts.archive == 'win64'
+      print 'Running on Windows'
+      if machine == 'AMD64':
+        print '64-bit'
+        opts.archive = 'win64'
       elif machine == 'i386' or machine == 'i686':
-        opts.archive == 'win64'
+        print '32-bit'
+        opts.archive = 'win'
     print 'Running the %s builds' % opts.archive
 
   if opts.asan:
