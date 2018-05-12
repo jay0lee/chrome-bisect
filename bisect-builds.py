@@ -1129,6 +1129,11 @@ def main():
 
   (opts, args) = parser.parse_args()
 
+  if args == []:
+    website = raw_input('Enter website used to start issue reproduction: ')
+    args = ['--no-first-run', website]
+  print 'Got Chromium args: %s' % args
+
   if opts.archive is None:
     machine = platform.machine()
     system = platform.system()
