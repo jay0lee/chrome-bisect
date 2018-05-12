@@ -72,6 +72,7 @@ CREDENTIAL_ERROR_MESSAGE = ('You are attempting to access protected data with '
 
 ###############################################################################
 
+import datetime
 import glob
 import httplib
 import json
@@ -554,7 +555,7 @@ def CopyMissingFileFromCurrentSource(src_glob, dst):
 
 def RunRevision(context, revision, zip_file, profile, num_runs, command, args):
   """Given a zipped revision, unzip it and run the test."""
-  print 'Trying revision %s...' % str(revision)
+  print 'Trying revision %s at %s...' % (str(revision), datetime.datetime.now())
 
   # Create a temp directory and unzip the revision into it.
   cwd = os.getcwd()
@@ -591,6 +592,8 @@ def RunRevision(context, revision, zip_file, profile, num_runs, command, args):
       runcommand.append(
           token.replace('%p', os.path.abspath(context.GetLaunchPath(revision))).
           replace('%s', ' '.join(testargs)))
+
+  print 'Revision %s stopped at %s...' % (str(revision), datetime.datetime.now())
 
   results = []
   for _ in range(num_runs):
@@ -1024,7 +1027,10 @@ def convertChromeMajorToVersion(major):
       data = response.read()
       p = re.compile(r"^.*refs\/tags\/([0-9.]*)$", re.MULTILINE)
       chromium_branches = p.findall(data)
+  # find all branches with same major release as us
   same_major = [x for x in chromium_branches if x.startswith('%s.' % major)]
+
+  # the most common third number in a branch should be the actual Chrome stable branch
   builds = {}
   for branch in same_major:
     split_version = branch.split('.')
