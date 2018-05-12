@@ -1155,13 +1155,13 @@ def main():
 
   # Pick a starting point, try to get HEAD for this.
   if not opts.bad:
-    context.bad_revision = '999.0.0.0'
-    context.bad_revision = GetChromiumRevision(
-        context, context.GetLastChangeURL())
-
+#    context.bad_revision = '999.0.0.0'
+#    context.bad_revision = GetChromiumRevision(
+#        context, context.GetLastChangeURL())
+    context.bad_revision = input('Enter the first version of Chrome where you see this issue: ')
   # Find out when we were good.
   if not opts.good:
-    context.good_revision = 0
+    context.good_revision = input('Enter the last version of Chrome where you did not see this issue: ')
 
   if opts.flash_path:
     msg = 'Could not find Flash binary at %s' % opts.flash_path
