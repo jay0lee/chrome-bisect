@@ -8,11 +8,6 @@ del /q /f *.wixpdb
 
 c:\python27\scripts\pyinstaller --clean -F --distpath=chrome-bisect windows.spec
 xcopy LICENSE chrome-bisect\
-del gam\w9xpopen.exe
-"%ProgramFiles%\7-Zip\7z.exe" a -tzip chrome-bisect-%1-windows.zip chrome-bisect\ -xr!.svn
-
-c:\python27\scripts\pyinstaller --clean -F --distpath=chrome-bisect windows.spec
-xcopy LICENSE chrome-bisect\
 "%ProgramFiles%\7-Zip\7z.exe" a -tzip chrome-bisect-%1-windows.zip chrome-bisect\ -xr!.svn
 
 set CBVERSION=%1
