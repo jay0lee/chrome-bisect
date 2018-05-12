@@ -21,8 +21,8 @@
     <UIRef Id="WixUI_InstallDir" />
 
     <Feature
-        Id="chrome-bisect"
-        Title="Chrome-Bisect"
+        Id="chrome_bisect"
+        Title="Chrome Bisect"
         Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
@@ -41,7 +41,7 @@
     <ComponentGroup
         Id="ProductComponents"
         Directory="INSTALLFOLDER"
-        Source="chrome-bisect-64">
+        Source="chrome-bisect">
       <Component Id="chrome_bisect_exe" Guid="887abd07-74c5-4acc-6f71-48daf62babc1">
         <File Name="chrome-bisect.exe" KeyPath="yes" />
         <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]" Permanent="yes" Part="last" Action="set" System="yes" />
