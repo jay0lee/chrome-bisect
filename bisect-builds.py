@@ -12,6 +12,8 @@ unzipping, and opening Chromium for you. After testing the specific revision,
 it will ask you whether it is good or bad before continuing the search.
 """
 
+__version__ = '1.0'
+
 # The base URL for stored build archives.
 CHROMIUM_BASE_URL = ('http://commondatastorage.googleapis.com'
                      '/chromium-browser-snapshots')
@@ -1155,7 +1157,16 @@ def main():
   parser.add_option("-r", action="callback", callback=error_internal_option)
   parser.add_option("-o", action="callback", callback=error_internal_option)
 
+  parser.add_option('-v', '--version',
+                    dest='version',
+                    action='store_true',
+                    help='Show version information and exit.')
+
   (opts, args) = parser.parse_args()
+
+  if opts.version:
+    print 'Chrome Bisect %s' % __version__
+    sys.exit(0)
 
   if args == []:
     website = raw_input('Enter website used to start issue reproduction: ')
