@@ -76,6 +76,7 @@ import glob
 import httplib
 import json
 import optparse
+import operator
 import os
 import platform
 import re
@@ -1012,6 +1013,27 @@ def GetGitHashFromSVNRevision(svn_revision):
     if 'git_sha' in data:
       return data['git_sha']
 
+chromium_branches = []
+def convertChromeMajorToVersion(major):
+  global chromium_branches
+  if chromium_branches == []:
+    txt_url = 'https://chromium.googlesource.com/chromium/src/+refs?format=TEXT'
+    print 'finding exact Chromium branch for %s...' % major
+    response = urllib.urlopen(txt_url)
+    if response.getcode() == 200:
+      data = response.read()
+      p = re.compile(r"^.*refs\/tags\/([0-9.]*)$", re.MULTILINE)
+      chromium_branches = p.findall(data)
+  same_major = [x for x in chromium_branches if x.startswith('%s.' % major)]
+  builds = {}
+  for branch in same_major:
+    split_version = branch.split('.')
+    builds[split_version[2]] = builds.get(split_version[2], 0) + 1
+  most_common = max(builds.iteritems(), key=operator.itemgetter(1))[0]
+  final_branch = '%s.0.%s.0' % (major, most_common)
+  print 'Chrome %s == Chromium branch %s' % (major, final_branch)
+  return final_branch
+
 def convertChromeVersionToBuild(version):
   json_url = 'https://omahaproxy.appspot.com/deps.json?version=%s' % version
   response = urllib.urlopen(json_url)
@@ -1189,12 +1211,22 @@ def main():
     assert os.path.exists(opts.flash_path), msg
 
   if isinstance(context.good_revision, basestring) and context.good_revision.find('.') != -1:
+    # assume we have an exact Chrome version like  68.0.3416.0
     context.good_revision = convertChromeVersionToBuild(context.good_revision)
+  elif int(context.good_revision) < 1000:
+    # assume we have a major Chrome version like 68
+    context.good_revision = convertChromeVersionToBuild(convertChromeMajorToVersion(context.good_revision))
   else:
+    # assume we have a Chromium build number
     context.good_revision = int(context.good_revision)
   if isinstance(context.bad_revision, basestring) and context.bad_revision.find('.') != -1:
+    # assume we have an exact Chrome version like 68
     context.bad_revision = convertChromeVersionToBuild(context.bad_revision)
+  elif int(context.bad_revision) < 1000:
+    # assume we have a major Chrome version like 68
+    context.bad_revision = convertChromeVersionToBuild(convertChromeMajorToVersion(context.bad_revision))
   else:
+    # assume we have a Chromium build number
     context.bad_revision = int(context.bad_revision)
 
   if opts.times < 1:
