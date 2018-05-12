@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" >
+  <Product
+      Id="*"
+      Name="Chrome Bisect"
+      Language="1033"
+      Version="$(env.CBVERSION)"
+      Manufacturer="Jay Lee - jay0lee@gmail.com"
+      UpgradeCode="15C5ED61-B14C-4E24-D26F-CD9424C19E9F">
+    <Package
+        InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade
+        DowngradeErrorMessage=
+            "A newer version of [ProductName] is already installed."
+        Schedule="afterInstallExecute" />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
+    <UIRef Id="WixUI_InstallDir" />
+
+    <Feature
+        Id="chrome-bisect"
+        Title="Chrome-Bisect"
+        Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ROOTDRIVE">
+          <Directory Id="INSTALLFOLDER" Name="Chrome-Bisect" />
+        </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <!-- Group of components that are our main application items -->
+    <ComponentGroup
+        Id="ProductComponents"
+        Directory="INSTALLFOLDER"
+        Source="chrome-bisect-64">
+      <Component Id="chrome_bisect_exe" Guid="887abd07-74c5-4acc-6f71-48daf62babc1">
+        <File Name="chrome-bisect.exe" KeyPath="yes" />
+        <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]" Permanent="yes" Part="last" Action="set" System="yes" />
+      </Component>
+      <Component Id="license" Guid="7c15dd2e-fe91-3d0a-a8bf-c6b19c68f469">
+        <File Name="LICENSE" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <InstallUISequence>
+      <ExecuteAction />
+      <Show Dialog="WelcomeDlg" Before="ProgressDlg" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+    </InstallExecuteSequence>
+  </Fragment>
+</Wix>
