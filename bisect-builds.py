@@ -1011,6 +1011,22 @@ def GetGitHashFromSVNRevision(svn_revision):
     if 'git_sha' in data:
       return data['git_sha']
 
+def convertChromeVersionToBuild(version):
+  json_url = 'https://omahaproxy.appspot.com/deps.json?version=%s' % version
+  response = urllib.urlopen(json_url)
+  if response.getcode() == 200:
+    try:
+      data = json.loads(response.read())
+      build = int(data['chromium_base_position'])
+      print '%s == %s' % (version, build)
+      return build
+    except ValueError:
+      print 'ValueError for JSON URL: %s' % json_url
+      raise ValueError
+  else:
+    print 'Error %s converting %s to a build number' % (response.getcode(), version)
+    raise ValueError
+
 def PrintChangeLog(min_chromium_rev, max_chromium_rev):
   """Prints the changelog URL."""
 
@@ -1151,8 +1167,14 @@ def main():
     msg = 'Could not find Flash binary at %s' % opts.flash_path
     assert os.path.exists(opts.flash_path), msg
 
-  context.good_revision = int(context.good_revision)
-  context.bad_revision = int(context.bad_revision)
+  if context.good_revision.find('.') != -1:
+    context.good_revision = convertChromeVersionToBuild(context.good_revision)
+  else:
+    context.good_revision = int(context.good_revision)
+  if context.bad_revision.find('.') != -1:
+    context.bad_revision = convertChromeVersionToBuild(context.bad_revision)
+  else:
+    context.bad_revision = int(context.bad_revision)
 
   if opts.times < 1:
     print('Number of times to run (%d) must be greater than or equal to 1.' %
