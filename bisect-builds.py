@@ -1114,7 +1114,7 @@ def main():
   parser.add_option('--use-local-cache',
                     dest='use_local_cache',
                     action='store_true',
-                    default=False,
+                    default=True,
                     help='Use a local file in the current directory to cache '
                          'a list of known revisions to speed up the '
                          'initialization of this script.')
@@ -1166,12 +1166,12 @@ def main():
                         opts.flash_path)
 
   # Pick a starting point, try to get HEAD for this.
-  if not opts.bad:
-    context.bad_revision = raw_input('Enter the first version of Chrome where you see this issue: ')
-  # Find out when we were good.
-  if not opts.good:
-    context.good_revision = raw_input('Enter the last version of Chrome where you did not see this issue: ')
 
+# Find out when we were good.
+  if not opts.good:
+    context.good_revision = raw_input('Enter the last version of Chrome where you DID NOT see this issue: ')
+  if not opts.bad:
+    context.bad_revision = raw_input('Enter the first version of Chrome where you DID see this issue: ')
   if opts.flash_path:
     msg = 'Could not find Flash binary at %s' % opts.flash_path
     assert os.path.exists(opts.flash_path), msg
