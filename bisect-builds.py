@@ -77,6 +77,7 @@ import httplib
 import json
 import optparse
 import os
+import platform
 import re
 import shlex
 import shutil
@@ -1120,7 +1121,7 @@ def main():
   parser.add_option('--verify-range',
                     dest='verify_range',
                     action='store_true',
-                    default=False,
+                    default=True,
                     help='Test the first and last revisions in the range ' +
                          'before proceeding with the bisect.')
   parser.add_option("-r", action="callback", callback=error_internal_option)
@@ -1129,10 +1130,21 @@ def main():
   (opts, args) = parser.parse_args()
 
   if opts.archive is None:
-    print 'Error: missing required parameter: --archive'
-    print
-    parser.print_help()
-    return 1
+    machine = platform.machine()
+    system = platform.system()
+    if system == 'Linux':
+      if machine == 'x86_64':
+        opts.archive = 'linux64'
+      elif machine == 'i386' or machine == 'i686':
+        opts.archive = 'linux'
+    elif system == 'Darwin':
+      opts.archive == 'mac64'
+    elif system == 'Windows':
+      if machine == 'x86_64':
+        opts.archive == 'win64'
+      elif machine == 'i386' or machine == 'i686':
+        opts.archive == 'win64'
+    print 'Running the %s builds' % opts.archive
 
   if opts.asan:
     supported_platforms = ['linux', 'mac', 'win']
@@ -1155,23 +1167,20 @@ def main():
 
   # Pick a starting point, try to get HEAD for this.
   if not opts.bad:
-#    context.bad_revision = '999.0.0.0'
-#    context.bad_revision = GetChromiumRevision(
-#        context, context.GetLastChangeURL())
-    context.bad_revision = input('Enter the first version of Chrome where you see this issue: ')
+    context.bad_revision = raw_input('Enter the first version of Chrome where you see this issue: ')
   # Find out when we were good.
   if not opts.good:
-    context.good_revision = input('Enter the last version of Chrome where you did not see this issue: ')
+    context.good_revision = raw_input('Enter the last version of Chrome where you did not see this issue: ')
 
   if opts.flash_path:
     msg = 'Could not find Flash binary at %s' % opts.flash_path
     assert os.path.exists(opts.flash_path), msg
 
-  if context.good_revision.find('.') != -1:
+  if isinstance(context.good_revision, basestring) and context.good_revision.find('.') != -1:
     context.good_revision = convertChromeVersionToBuild(context.good_revision)
   else:
     context.good_revision = int(context.good_revision)
-  if context.bad_revision.find('.') != -1:
+  if isinstance(context.bad_revision, basestring) and context.bad_revision.find('.') != -1:
     context.bad_revision = convertChromeVersionToBuild(context.bad_revision)
   else:
     context.bad_revision = int(context.bad_revision)
