@@ -172,7 +172,6 @@ if [ "$upgrade_only" = true ]; then
     echo_red "ERROR: Failed running Chrome Bisect for the first time with $rc. Please report this error to Chrome Bisect GitHub issues. Exiting."
     exit
   fi
-
   echo_green "Chrome Bisect upgrade complete!"
   exit
 fi
@@ -197,7 +196,7 @@ if (( $rc != 0 )); then
   exit
 fi
 
-echo_green "Chrome Biect installation and setup complete!"
+echo_green "Chrome Bisect installation and setup complete!"
 if [ "$update_profile" = true ]; then
   echo_green "Please restart your terminal shell or to get started right away run:\n\n$alias_line"
 fi
