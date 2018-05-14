@@ -12,7 +12,7 @@ unzipping, and opening Chromium for you. After testing the specific revision,
 it will ask you whether it is good or bad before continuing the search.
 """
 
-__version__ = '1.01'
+__version__ = '1.02'
 
 # The base URL for stored build archives.
 CHROMIUM_BASE_URL = ('http://commondatastorage.googleapis.com'
