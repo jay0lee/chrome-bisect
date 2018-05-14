@@ -25,7 +25,7 @@
                 <Shortcut Id="ApplicationStartMenuShortcut"
                      Name="Chrome Bisect"
                    Description="Chrome Bisect Tool"
-                    Target="[#chrome-bisect.exe]"
+                    Target="[#chrome_bisect.exe]"
                           WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
                 <RegistryValue Root="HKCU" Key="Software\Microsoft\MyApplicationName" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
@@ -58,7 +58,7 @@
         Directory="INSTALLFOLDER"
         Source="chrome-bisect">
       <Component Id="chrome_bisect_exe" Guid="887abd07-74c5-4acc-6f71-48daf62babc1">
-        <File Id="chrome-bisect.exe" Name="chrome-bisect.exe" KeyPath="yes" />
+        <File Id="chrome_bisect.exe" Name="chrome-bisect.exe" KeyPath="yes" />
         <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]" Permanent="yes" Part="last" Action="set" System="yes" />
       </Component>
       <Component Id="license" Guid="7c15dd2e-fe91-3d0a-a8bf-c6b19c68f469">
