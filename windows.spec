@@ -1,5 +1,5 @@
 # -*- mode: python -*-
-a = Analysis(['bisect-builds.py'],
+a = Analysis(['chrome-bisect.py'],
              pathex=['C:\\Users\\jlee\\Documents\\GitHub\\GAM'],
              hiddenimports=[],
              hookspath=None,

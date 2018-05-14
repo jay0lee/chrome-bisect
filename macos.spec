@@ -1,5 +1,5 @@
 # -*- mode: python -*-
-a = Analysis(['bisect-builds.py'],
+a = Analysis(['chrome-bisect.py'],
              hiddenimports=[],
              hookspath=None,
              excludes=['_tkinter'],

@@ -139,7 +139,7 @@ class PathContext(object):
     # metadata.
     abs_file_path = os.path.abspath(os.path.realpath(__file__))
     local_src_path = os.path.join(os.path.dirname(abs_file_path), '..')
-    if abs_file_path.endswith(os.path.join('tools', 'bisect-builds.py')) and\
+    if abs_file_path.endswith(os.path.join('tools', 'chrome-bisect.py')) and\
         os.path.exists(os.path.join(local_src_path, '.git')):
       self.local_src_path = os.path.normpath(local_src_path)
     else:
@@ -400,10 +400,10 @@ class PathContext(object):
     self.bad_revision."""
 
     cache = {}
-    # The cache is stored in the same directory as bisect-builds.py
+    # The cache is stored in the same directory as chrome-bisect.py
     cache_filename = os.path.join(
         os.path.abspath(os.path.dirname(__file__)),
-        '.bisect-builds-cache.json')
+        '.chrome-bisect-cache.json')
     cache_dict_key = self.GetListingURL()
 
     def _LoadBucketFromCache():
