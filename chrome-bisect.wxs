@@ -64,7 +64,7 @@
       <Component Id="license" Guid="7c15dd2e-fe91-3d0a-a8bf-c6b19c68f469">
         <File Name="LICENSE" KeyPath="yes" />
       </Component>
-      <Component Id="ApplicationShortcut" />
+      <ComponentRef Id="ApplicationShortcut" />
     </ComponentGroup>
   </Fragment>
 
