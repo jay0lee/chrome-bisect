@@ -20,6 +20,18 @@
     <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
     <UIRef Id="WixUI_InstallDir" />
 
+        <DirectoryRef Id="ApplicationProgramsFolder">
+            <Component Id="ApplicationShortcut" Guid="7c15de2e-fe92-4d0a-b8bf-b6b19d68f464">
+                <Shortcut Id="ApplicationStartMenuShortcut"
+                     Name="Chrome Bisect"
+                   Description="Chrome Bisect Tool"
+                    Target="[#chrome-bisect.exe]"
+                          WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+                <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+                <RegistryValue Root="HKCU" Key="Software\Microsoft\MyApplicationName" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+           </Component>
+        </DirectoryRef>
+
     <Feature
         Id="chrome_bisect"
         Title="Chrome Bisect"
@@ -31,7 +43,10 @@
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ROOTDRIVE">
-          <Directory Id="INSTALLFOLDER" Name="Chrome-Bisect" />
+        <Directory Id="INSTALLFOLDER" Name="Chrome-Bisect" />
+        <Directory Id="ProgramMenuFolder">
+    <Directory Id="ApplicationProgramsFolder" Name="Chrome Bisect"/>
+</Directory>
         </Directory>
     </Directory>
   </Fragment>
@@ -49,6 +64,7 @@
       <Component Id="license" Guid="7c15dd2e-fe91-3d0a-a8bf-c6b19c68f469">
         <File Name="LICENSE" KeyPath="yes" />
       </Component>
+      <Component Id="ApplicationShortcut" />
     </ComponentGroup>
   </Fragment>
 
