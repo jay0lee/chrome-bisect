@@ -39,7 +39,7 @@ Once you know these details, go ahead and run Chrome Bisect. You'll be prompted 
   1. The tool will need to download and run about a dozen builds to narrow the build scope as tightly as possible. Keep marking builds as good or bad until the tool finishes.
   1. Once the tool is finished with builds, it will tell you the exact builds between good and bad behavior. It also gives you a link to the changes that were made to Chromium browser between the last good and first bad build.
   1. Open the changelog page and look through the list.
-      * Can you tell which exact change in the list caused the bad behavior?
+      * Can you tell which exact change in the list caused the site to stop loading?
       * Why was that change made?
       * What might you need to do to fix your site?
 
