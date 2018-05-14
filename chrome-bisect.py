@@ -12,7 +12,7 @@ unzipping, and opening Chromium for you. After testing the specific revision,
 it will ask you whether it is good or bad before continuing the search.
 """
 
-__version__ = '1.02'
+__version__ = '1.03'
 
 # The base URL for stored build archives.
 CHROMIUM_BASE_URL = ('http://commondatastorage.googleapis.com'
@@ -1193,25 +1193,20 @@ def main():
   print 'Got Chromium args: %s' % args
 
   if opts.archive is None:
-    machine = platform.machine()
     system = platform.system()
     if system == 'Linux':
       print 'Running on Linux'
-      if machine == 'x86_64':
-        print '64-bit'
-        opts.archive = 'linux64'
-      elif machine == 'i386' or machine == 'i686':
-        print '32-bit'
-        opts.archive = 'linux'
+      opts.archive = 'linux64'
     elif system == 'Darwin':
-      print 'Running on MacOS 64-bit'
+      print 'Running on MacOS'
       opts.archive = 'mac64'
     elif system == 'Windows':
       print 'Running on Windows'
+      machine = platform.machine()
       if machine == 'AMD64':
         print '64-bit'
         opts.archive = 'win64'
-      elif machine == 'i386' or machine == 'i686':
+      elif machine in ['i386', 'i686', 'x86']:
         print '32-bit'
         opts.archive = 'win'
     print 'Running the %s builds' % opts.archive
