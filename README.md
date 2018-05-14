@@ -42,5 +42,11 @@ Once you know these details, go ahead and run Chrome Bisect. You'll be prompted 
       * Can you tell which exact change in the list caused the bad behavior?
       * Why was that change made?
       * What might you need to do to fix your site?
-    
-    
+
+# Known Limitations
+As mentioned above, Chrome Bisect has a few limitations that you should be aware of:
+* Chrome Bisect downloads public Chromium browser binaries to test with, these open-source public builds do not contain everythng the official Chrome browser contains and may not be good for testing issues related to:
+     * The PDF Viewer
+     * Adobe Flash Player
+     * Widevine DRM
+* Currently the tool does not not support Chrome OS. If you have an issue on Chrome OS try reproducing it in Chrome browser on Windows, Mac or Linux and see if you can utilize the tool there.
