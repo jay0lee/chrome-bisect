@@ -95,6 +95,20 @@ from xml.etree import ElementTree
 import zipfile
 
 
+class Tee(object):
+    def __init__(self, f):
+        self.file = f
+        self.stdout = sys.stdout
+        sys.stdout = self
+    def __del__(self):
+        sys.stdout = self.stdout
+        self.file.close()
+    def write(self, data):
+        self.file.write(data)
+        self.stdout.write(data)
+    def flush(self):
+        self.file.flush()
+
 class PathContext(object):
   """A PathContext is used to carry the information used to construct URLs and
   paths when dealing with the storage server and archives."""
@@ -1168,6 +1182,11 @@ def main():
     print 'Chrome Bisect %s' % __version__
     sys.exit(0)
 
+  logfileprefix = 'chrome-bisect-%s' % datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')
+  logfile = tempfile.NamedTemporaryFile(prefix=logfileprefix, suffix='.log', delete=False)
+  logger = Tee(logfile)
+  print 'logging to stdout and %s' % logfile.name
+
   if args == []:
     website = raw_input('Enter website used to start issue reproduction: ')
     args = ['--no-first-run', website]
@@ -1218,7 +1237,7 @@ def main():
 
   # Pick a starting point, try to get HEAD for this.
 
-# Find out when we were good.
+  # Find out when we were good.
   if not opts.good:
     context.good_revision = raw_input('Enter the last version of Chrome where you DID NOT see this issue: ')
   if not opts.bad:
@@ -1302,7 +1321,7 @@ def main():
 
     print 'CHANGELOG URL:'
     PrintChangeLog(min_chromium_rev, max_chromium_rev)
-
+  print 'Please include %s logfile with any bug report' % logfile.name
 
 if __name__ == '__main__':
   sys.exit(main())
