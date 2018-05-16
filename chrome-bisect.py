@@ -76,20 +76,19 @@ CREDENTIAL_ERROR_MESSAGE = ('You are attempting to access protected data with '
 
 import datetime
 import glob
-import httplib
 import json
 import optparse
 import operator
 import os
 import platform
 import re
+import requests
 import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
 import threading
-import urllib
 from distutils.version import LooseVersion
 from xml.etree import ElementTree
 import zipfile
@@ -249,7 +248,7 @@ class PathContext(object):
       next-marker is not None, then the listing is a partial listing and another
       fetch should be performed with next-marker being the marker= GET
       parameter."""
-      handle = urllib.urlopen(url)
+      handle = requests.get(url).text
       document = ElementTree.parse(handle)
 
       # All nodes in the tree are namespaced. Get the root's tag name to extract
@@ -334,10 +333,10 @@ class PathContext(object):
 
   def _GetSVNRevisionFromGitHashWithoutGitCheckout(self, git_sha1, depot):
     json_url = GITHASH_TO_SVN_URL[depot] % git_sha1
-    response = urllib.urlopen(json_url)
-    if response.getcode() == 200:
+    response = requests.get(json_url)
+    if response.status_code == 200:
       try:
-        data = json.loads(response.read()[4:])
+        data = json.loads(response.text[4:])
       except ValueError:
         print 'ValueError for JSON URL: %s' % json_url
         raise ValueError
@@ -527,29 +526,16 @@ def FetchRevision(context, rev, filename, quit_event=None, progress_event=None):
                     to indicate that the progress of the download should be
                     displayed.
   """
-  def ReportHook(blocknum, blocksize, totalsize):
-    if quit_event and quit_event.isSet():
-      raise RuntimeError('Aborting download of revision %s' % str(rev))
-    if progress_event and progress_event.isSet():
-      size = blocknum * blocksize
-      if totalsize == -1:  # Total size not known.
-        progress = 'Received %d bytes' % size
-      else:
-        size = min(totalsize, size)
-        progress = 'Received %d of %d bytes, %.2f%%' % (
-            size, totalsize, 100.0 * size / totalsize)
-      # Send a \r to let all progress messages use just one line of output.
-      sys.stdout.write('\r' + progress)
-      sys.stdout.flush()
   download_url = context.GetDownloadURL(rev)
-  try:
-    urllib.urlretrieve(download_url, filename, ReportHook)
-    if progress_event and progress_event.isSet():
-      print
-
-  except RuntimeError:
-    pass
-
+  #urllib.urlretrieve(download_url, filename, ReportHook)
+  with open(filename, 'wb') as f:
+    response = requests.get(download_url, stream=True)
+    total_length = response.headers.get('content-length')
+    if total_length is None:
+      f.write(response.content)
+    else:
+      for data in response.iter_content(chunk_size=4096):
+        f.write(data)
 
 def CopyMissingFileFromCurrentSource(src_glob, dst):
   """Work around missing files in archives.
@@ -609,7 +595,6 @@ def RunRevision(context, revision, zip_file, profile, num_runs, command, args):
           token.replace('%p', os.path.abspath(context.GetLaunchPath(revision))).
           replace('%s', ' '.join(testargs)))
 
-  print 'Revision %s stopped at %s...' % (str(revision), datetime.datetime.now())
 
   results = []
   for _ in range(num_runs):
@@ -954,8 +939,8 @@ def GetBlinkDEPSRevisionForChromiumRevision(self, rev):
     if m:
       return m.group(1)
 
-  url = urllib.urlopen(DEPS_FILE % GetGitHashFromSVNRevision(rev))
-  if url.getcode() == 200:
+  url = requests.get(DEPS_FILE % GetGitHashFromSVNRevision(rev))
+  if url.status_code == 200:
     blink_re = re.compile(r'webkit_revision\D*\d+;\D*\d+;(\w+)')
     blink_git_sha = _GetBlinkRev(url, blink_re)
     return self.GetSVNRevisionFromGitHash(blink_git_sha, 'blink')
@@ -974,10 +959,10 @@ def GetBlinkRevisionForChromiumRevision(context, rev):
     rev = context.githash_svn_dict[str(rev)]
   file_url = '%s/%s%s/REVISIONS' % (context.base_url,
                                     context._listing_platform_dir, rev)
-  url = urllib.urlopen(file_url)
-  if url.getcode() == 200:
+  url = requests.get(file_url)
+  if url.status_code == 200:
     try:
-      data = json.loads(url.read())
+      data = json.loads(url.text)
     except ValueError:
       print 'ValueError for JSON URL: %s' % file_url
       raise ValueError
@@ -1016,7 +1001,7 @@ def GetChromiumRevision(context, url):
   """Returns the chromium revision read from given URL."""
   try:
     # Location of the latest build revision number
-    latest_revision = urllib.urlopen(url).read()
+    latest_revision = requests.get(url).text
     if latest_revision.isdigit():
       return int(latest_revision)
     return context.GetSVNRevisionFromGitHash(latest_revision)
@@ -1026,9 +1011,9 @@ def GetChromiumRevision(context, url):
 
 def GetGitHashFromSVNRevision(svn_revision):
   crrev_url = CRREV_URL + str(svn_revision)
-  url = urllib.urlopen(crrev_url)
-  if url.getcode() == 200:
-    data = json.loads(url.read())
+  url = requests.get(crrev_url)
+  if url.status_code == 200:
+    data = json.loads(url.text)
     if 'git_sha' in data:
       return data['git_sha']
 
@@ -1038,9 +1023,9 @@ def convertChromeMajorToVersion(major):
   if chromium_branches == []:
     txt_url = 'https://chromium.googlesource.com/chromium/src/+refs?format=TEXT'
     print 'finding exact Chromium branch for %s...' % major
-    response = urllib.urlopen(txt_url)
-    if response.getcode() == 200:
-      data = response.read()
+    response = requests.get(txt_url)
+    if response.status_code == 200:
+      data = response.text
       p = re.compile(r"^.*refs\/tags\/([0-9.]*)$", re.MULTILINE)
       chromium_branches = p.findall(data)
   # find all branches with same major release as us
@@ -1058,10 +1043,10 @@ def convertChromeMajorToVersion(major):
 
 def convertChromeVersionToBuild(version):
   json_url = 'https://omahaproxy.appspot.com/deps.json?version=%s' % version
-  response = urllib.urlopen(json_url)
-  if response.getcode() == 200:
+  response = requests.get(json_url)
+  if response.status_code == 200:
     try:
-      data = json.loads(response.read())
+      data = json.loads(response.text)
       build = int(data['chromium_base_position'])
       print 'Chrome version %s == Chromium build %s' % (version, build)
       return build
@@ -1069,7 +1054,7 @@ def convertChromeVersionToBuild(version):
       print 'ValueError for JSON URL: %s' % json_url
       raise ValueError
   else:
-    print 'Error %s converting %s to a build number' % (response.getcode(), version)
+    print 'Error %s converting %s to a build number' % (response.status_code, version)
     raise ValueError
 
 def PrintChangeLog(min_chromium_rev, max_chromium_rev):
