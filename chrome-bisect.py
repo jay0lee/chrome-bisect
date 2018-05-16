@@ -248,8 +248,8 @@ class PathContext(object):
       next-marker is not None, then the listing is a partial listing and another
       fetch should be performed with next-marker being the marker= GET
       parameter."""
-      handle = requests.get(url).text
-      document = ElementTree.parse(handle)
+      r = requests.get(url)
+      document = ElementTree.ElementTree(ElementTree.fromstring(r.text))
 
       # All nodes in the tree are namespaced. Get the root's tag name to extract
       # the namespace. Etree does namespaces as |{namespace}tag|.
@@ -527,7 +527,6 @@ def FetchRevision(context, rev, filename, quit_event=None, progress_event=None):
                     displayed.
   """
   download_url = context.GetDownloadURL(rev)
-  #urllib.urlretrieve(download_url, filename, ReportHook)
   with open(filename, 'wb') as f:
     response = requests.get(download_url, stream=True)
     total_length = response.headers.get('content-length')
