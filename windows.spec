@@ -1,7 +1,7 @@
 # -*- mode: python -*-
 a = Analysis(['chrome-bisect.py'],
-             pathex=['C:\\Users\\jlee\\Documents\\GitHub\\GAM'],
-             hiddenimports=[],
+             pathex=[],
+             hiddenimports=['urllib3.exceptions', 'chardet'],
              hookspath=None,
              excludes=['_tkinter'],
              runtime_hooks=None)

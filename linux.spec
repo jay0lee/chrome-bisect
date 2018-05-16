@@ -1,6 +1,6 @@
 # -*- mode: python -*-
 a = Analysis(['chrome-bisect.py'],
-             hiddenimports=[],
+             hiddenimports=['urllib3.exceptions', 'chardet'],
              hookspath=None,
              excludes=['_tkinter'],
              runtime_hooks=None)
