@@ -91,6 +91,7 @@ import tempfile
 import threading
 from distutils.version import LooseVersion
 from xml.etree import ElementTree
+import webbrowser
 import zipfile
 
 
@@ -1056,11 +1057,11 @@ def convertChromeVersionToBuild(version):
     print 'Error %s converting %s to a build number' % (response.status_code, version)
     raise ValueError
 
-def PrintChangeLog(min_chromium_rev, max_chromium_rev):
-  """Prints the changelog URL."""
+def GetChangeLog(min_chromium_rev, max_chromium_rev):
+  """Formats the changelog URL."""
 
-  print ('  ' + CHANGELOG_URL % (GetGitHashFromSVNRevision(min_chromium_rev),
-         GetGitHashFromSVNRevision(max_chromium_rev)))
+  return CHANGELOG_URL % (GetGitHashFromSVNRevision(min_chromium_rev),
+         GetGitHashFromSVNRevision(max_chromium_rev))
 
 def error_internal_option(option, opt, value, parser):
    raise optparse.OptionValueError(
@@ -1299,8 +1300,13 @@ def main():
              'you might also want to do a Blink bisect.')
 
     print 'CHANGELOG URL:'
-    PrintChangeLog(min_chromium_rev, max_chromium_rev)
+    changelog = GetChangeLog(min_chromium_rev, max_chromium_rev)
+    print '    %s' % changelog
+    open_browser = raw_input('Do you want to open this changelog in your browser(y or N)? ')
+    if open_browser == 'y':
+      webbrowser.open(changelog)
   print 'Please include %s logfile with any bug report' % logfile.name
+
 
 if __name__ == '__main__':
   sys.exit(main())
