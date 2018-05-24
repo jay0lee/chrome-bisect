@@ -1238,9 +1238,12 @@ def main():
   if isinstance(context.bad_revision, basestring) and context.bad_revision.find('.') != -1:
     # assume we have an exact Chrome version like 68
     context.bad_revision = convertChromeVersionToBuild(context.bad_revision)
-  elif int(context.bad_revision) < 1000:
+  elif context.bad_revision.isdigit() and int(context.bad_revision) < 1000:
     # assume we have a major Chrome version like 68
     context.bad_revision = convertChromeVersionToBuild(convertChromeMajorToVersion(context.bad_revision))
+  elif context.bad_revision == 'HEAD':
+    context.bad_revision = '999.0.0'
+    context.bad_revision = GetChromiumRevision(context, context.GetLastChangeURL())
   else:
     # assume we have a Chromium build number
     context.bad_revision = int(context.bad_revision)
