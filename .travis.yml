@@ -23,6 +23,7 @@ before_install:
     cinst -y wixtoolset;
   fi
 - pip install pyinstaller
+- pip install -r requirements.txt
 
 install:
 - pyinstaller --clean -F --distpath=chrome-bisect $TRAVIS_OS_NAME.spec
