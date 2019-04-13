@@ -9,7 +9,7 @@ OPTIONS:
    -h      show help.
    -d      Directory where chrome-bisect folder will be installed. Default is \$HOME/bin/
    -a      Architecture to install (i386, x86_64, arm). Default is to detect your arch with "uname -m".
-   -o      OS we are running (linux, macos). Default is to detect your OS with "uname -s".
+   -o      OS we are running (linux, osx). Default is to detect your OS with "uname -s".
    -l      Just upgrade Chrome Bisect to latest version. Skips project creation and auth.
    -p      Profile update (true, false). Should script add chrome-bisect command to environment. Default is true.
    -v      Version to install (latest, prerelease, draft, 3.8, etc). Default is latest.
@@ -88,8 +88,8 @@ case $cbos in
     else
       echo_green "Good, you're running MacOS 10.$osver..."
     fi
-    cbos="macos"
-    cbfile="macos.tar.xz"
+    cbos="osx"
+    cbfile="osx.tar.xz"
     ;;
   *)
     echo_red "Sorry, this installer currently only supports Linux and MacOS. Looks like you're runnning on $cbos. Exiting."
@@ -181,7 +181,7 @@ if [ "$update_profile" = true ]; then
   alias_line="chrome-bisect() { \"$target_dir/chrome-bisect/chrome-bisect\" \"\$@\" ; }"
   if [ "$cbos" == "linux" ]; then
     update_profile "$HOME/.bashrc" || update_profile "$HOME/.bash_profile"
-  elif [ "$cbos" == "macos" ]; then
+  elif [ "$cbos" == "osx" ]; then
     update_profile "$HOME/.profile" || update_profile "$HOME/.bash_profile"
   fi
 else

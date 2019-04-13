@@ -14,8 +14,6 @@ matrix:
         packages: python@2
   - os: windows
     language: shell
-  - os: windows
-    language: shell
 
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
@@ -25,17 +23,17 @@ before_install:
     cinst -y wixtoolset;
   fi
 - pip install pyinstaller
+- pip install -r requirements.txt
 
 install:
-- pyinstaller --clean -F --dist-path=chrome-bisect $TRAVIS_OS_NAME.spec
+- pyinstaller --clean -F --distpath=chrome-bisect $TRAVIS_OS_NAME.spec
 - chrome-bisect/chrome-bisect --version
 - export CBVERSION=`chrome-bisect/chrome-bisect --short-version`
 - cp LICENSE chrome-bisect
-- cp GamCommands.txt chrome-bisect
 - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
     ARCHIVE=chrome-bisect-$CBVERSION-$TRAVIS_OS_NAME.zip;
     /c/Program\ Files/7-Zip/7z.exe a -tzip $ARCHIVE chrome-bisect -xr!.svn;
-    /c/Program\ Files\ \(x86\)/WiX\ Toolset\ v3.11/bin/candle.exe -arch x86 chrome-bisct.wxs;
+    /c/Program\ Files\ \(x86\)/WiX\ Toolset\ v3.11/bin/candle.exe -arch x86 chrome-bisect.wxs;
     /c/Program\ Files\ \(x86\)/Wix\ Toolset\ v3.11/bin/light.exe -ext /c/Program\ Files\ \(x86\)/WiX\ Toolset\ v3.11/bin/WixUIExtension.dll chrome-bisect.wixobj -o chrome-bisect-$CBVERSION-windows.msi || true;
     rm *.wixpdb;
   else
@@ -54,5 +52,9 @@ deploy:
   api_key:
     secure: bFnQEDnLssV7HcAUPiuM7OBEClecMfTD7tSM8cyCzXOOjISkFk0z4JFhGOPBO27x1WWaZrED2WFE8oWQhDt2J1nXRqT0BRzAsix2Jg35WVbX+zzmVEd/S6qDddt9BuVh1s1ot7KYdVbJc87uUhrgFbHvFo3q1on7pffpsRupJhBkrT9Kas2cC3RNoqDEiqzXPDMcboMbaf9egujo2bq+4W643Mar9HRJcY7XB5vaEc055PR+1ZN7XsM4IiARzgru4JVJGqcIdQYHOTbhssy9rrR9vSoFFjObAMIIcMJVEwODrfKOabiz9vmdHobi2sc/Vucq+a05jA0JqRFoyR02fJQSbyw7xJ2wFAAvd5OylvcJ2CKTQsu+0vX0IxdfZjjIGpDZJbQzeAL4s84rTsbhgYdGs1LKuzA7/7pMaz6s4S9b9jqjPDsBEdOQpy2NISRTynUePFzxvA3YtEVHzWWl/rBjbWnM8+KNlGAL3gDXBDxWZvDwCP8byOad5IGyTfrwiXk6rvXoeCxF2TFHXWs6LtINjDCOGMXMEnELE0LMHIN8l7IzcnFhdq8nBeWzCW5CFeI1MelGE/tu4+nEOLy+WtveL2zvFGETIj7JuDcCTUwn9QOWI1S4w3abizaHcBXJSzJ6dOZVzBzjBKQRXSsDgnH6RDIUut72U9D66YWda54=
   file: chrome-bisect-$CBVERSION-*
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  draft: true
   on:
     repo: jay0lee/chrome-bisect
