@@ -1067,20 +1067,28 @@ def convertChromeMajorToVersion(major):
   return final_branch
 
 def convertChromeVersionToBuild(version):
-  json_url = 'https://omahaproxy.appspot.com/deps.json?version=%s' % version
-  response = requests.get(json_url)
-  if response.status_code == 200:
-    try:
-      data = json.loads(response.text)
-      build = int(data['chromium_base_position'])
-      print 'Chrome version %s == Chromium build %s' % (version, build)
-      return build
-    except ValueError:
-      print 'ValueError for JSON URL: %s' % json_url
-      raise ValueError
-  else:
-    print 'Error %s converting %s to a build number' % (response.status_code, version)
-    raise ValueError
+  ver_arr = version.split('.')
+  while True:
+    version = '.'.join(ver_arr)
+    print 'Trying to get build number for %s...' % version
+    json_url = 'https://omahaproxy.appspot.com/deps.json?version=%s' % version
+    response = requests.get(json_url)
+    if response.status_code == 200:
+      try:
+        data = json.loads(response.text)
+        if 'chromium_base_position' not in data or not data['chromium_base_position']:
+          ver_arr[3] = str(int(ver_arr[3])+1)
+          continue
+        build = int(data['chromium_base_position'])
+        print 'Chrome version %s == Chromium build %s' % (version, build)
+        return build
+      except ValueError:
+        print 'ValueError for JSON URL: %s' % json_url
+        raise ValueError
+    else:
+      print 'Error %s converting %s to a build number' % (response.status_code, version)
+      ver_arr[3] = str(int(ver_arr[3])+1)
+      continue
 
 def GetChangeLog(min_chromium_rev, max_chromium_rev):
   """Formats the changelog URL."""
