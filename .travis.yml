@@ -25,7 +25,7 @@ before_install:
 - pip install pyinstaller
 
 install:
-- pyinstaller --clean -F --dist-path=chrome-bisect $TRAVIS_OS_NAME.spec
+- pyinstaller --clean -F --distpath=chrome-bisect $TRAVIS_OS_NAME.spec
 - chrome-bisect/chrome-bisect --version
 - export CBVERSION=`chrome-bisect/chrome-bisect --short-version`
 - cp LICENSE chrome-bisect
