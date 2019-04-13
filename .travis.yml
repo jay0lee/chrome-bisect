@@ -1,0 +1,64 @@
+if: tag IS blank
+
+matrix:
+  include:
+    - os: linux
+      language: python
+      dist: precise
+      python:
+        - "2.7.15"
+    - os: osx
+      language: generic
+      osx_image: xcode10.1
+      addons:
+        homebrew:
+          packages:
+            python@2
+    - os: windows
+      language: shell
+    - os: windows
+      language: shell
+
+before_install:
+- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+    powershell Install-WindowsFeature Net-Framework-Core;
+    cinst -y --forcex86 python2;
+    export PATH=$PATH:/c/Python27/scripts;
+    cinst -y wixtoolset;
+  fi
+- pip install pyinstaller
+
+install:
+- pyinstaller --clean -F --dist-path=chrome-bisect $TRAVIS_OS_NAME.spec
+- chrome-bisect/chrome-bisect --version
+- export CBVERSION=`chrome-bisect/chrome-bisect --short-version`
+- cp LICENSE chrome-bisect
+- cp GamCommands.txt chrome-bisect
+- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+    ARCHIVE=chrome-bisect-$CBVERSION-$TRAVIS_OS_NAME.zip;
+    /c/Program\ Files/7-Zip/7z.exe a -tzip $ARCHIVE chrome-bisect -xr!.svn;
+    /c/Program\ Files\ \(x86\)/WiX\ Toolset\ v3.11/bin/candle.exe -arch x86 chrome-bisct.wxs;
+    /c/Program\ Files\ \(x86\)/Wix\ Toolset\ v3.11/bin/light.exe -ext /c/Program\ Files\ \(x86\)/WiX\ Toolset\ v3.11/bin/WixUIExtension.dll chrome-bisect.wixobj -o chrome-bisect-$CBVERSION-windows.msi || true;
+    rm *.wixpdb;
+  else
+    CBARCHIVE=chrome-bisect-$CBVERSION-$TRAVIS_OS_NAME-$PLATFORM.tar.xz;
+    tar cfJ $CBARCHIVE chrome-bisect/;
+  fi
+
+script:
+- chrome-bisect/chrome-bisect --version
+
+before_deploy:
+- export TRAVIS_TAG="preview"
+
+#deploy:
+#  provider: releases
+#  api_key:
+#    secure: 
+#  file_glob: true
+#  overwrite: true
+#  file: chrome-bisect-$CBVERSION-*
+#  skip_cleanup: true
+#  draft: true
+#  on:
+#    repo: jay0lee/chrome-bisect

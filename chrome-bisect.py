@@ -1185,11 +1185,18 @@ def main():
                     dest='version',
                     action='store_true',
                     help='Show version information and exit.')
+  parser.add_option('--short-version',
+                    dest='shortversion',
+                    action='store_true',
+                    help='Output only version number.')
 
   (opts, args) = parser.parse_args()
 
   if opts.version:
     print 'Chrome Bisect %s' % __version__
+    sys.exit(0)
+  elif opts.shortversion:
+    sys.stdout.write(__version__)
     sys.exit(0)
 
   logfileprefix = 'chrome-bisect-%s' % datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')
