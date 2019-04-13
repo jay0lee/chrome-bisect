@@ -37,7 +37,7 @@ install:
     /c/Program\ Files\ \(x86\)/Wix\ Toolset\ v3.11/bin/light.exe -ext /c/Program\ Files\ \(x86\)/WiX\ Toolset\ v3.11/bin/WixUIExtension.dll chrome-bisect.wixobj -o chrome-bisect-$CBVERSION-windows.msi || true;
     rm *.wixpdb;
   else
-    CBARCHIVE=chrome-bisect-$CBVERSION-$TRAVIS_OS_NAME-$PLATFORM.tar.xz;
+    CBARCHIVE=chrome-bisect-$CBVERSION-$TRAVIS_OS_NAME.tar.xz;
     tar cfJ $CBARCHIVE chrome-bisect/;
   fi
 
