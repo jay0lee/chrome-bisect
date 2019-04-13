@@ -72,8 +72,8 @@ case $cbos in
   [lL]inux)
     cbos="linux"
     case $cbarch in
-      x86_64) cbfile="linux-x86_64.tar.xz";;
-      i?86) cbfile="linux-i686.tar.xz";;
+      x86_64) cbfile="linux.tar.xz";;
+      i?86) cbfile="linux.tar.xz";;
       arm*) cbfile="linux-armv7l.tar.xz";;
       *)
         echo_red "ERROR: this installer currently only supports i386, x86_64 and arm Linux. Looks like you're running on $cbarch. Exiting."
