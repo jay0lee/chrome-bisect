@@ -30,7 +30,6 @@ install:
 - chrome-bisect/chrome-bisect --version
 - export CBVERSION=`chrome-bisect/chrome-bisect --short-version`
 - cp LICENSE chrome-bisect
-- cp GamCommands.txt chrome-bisect
 - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
     ARCHIVE=chrome-bisect-$CBVERSION-$TRAVIS_OS_NAME.zip;
     /c/Program\ Files/7-Zip/7z.exe a -tzip $ARCHIVE chrome-bisect -xr!.svn;
