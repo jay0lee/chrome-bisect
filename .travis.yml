@@ -1,21 +1,19 @@
 if: tag IS blank
-
 matrix:
   include:
-    - os: linux
-      language: python
-      dist: precise
-      python:
-        - "2.7.15"
-    - os: osx
-      language: generic
-      osx_image: xcode10.1
-      addons:
-        homebrew:
-          packages:
-            python@2
-    - os: windows
-      language: shell
+  - os: linux
+    language: python
+    dist: precise
+    python:
+    - 2.7.15
+  - os: osx
+    language: generic
+    osx_image: xcode10.1
+    addons:
+      homebrew:
+        packages: python@2
+  - os: windows
+    language: shell
 
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
@@ -49,14 +47,10 @@ script:
 before_deploy:
 - export TRAVIS_TAG="preview"
 
-#deploy:
-#  provider: releases
-#  api_key:
-#    secure: 
-#  file_glob: true
-#  overwrite: true
-#  file: chrome-bisect-$CBVERSION-*
-#  skip_cleanup: true
-#  draft: true
-#  on:
-#    repo: jay0lee/chrome-bisect
+deploy:
+  provider: releases
+  api_key:
+    secure: bFnQEDnLssV7HcAUPiuM7OBEClecMfTD7tSM8cyCzXOOjISkFk0z4JFhGOPBO27x1WWaZrED2WFE8oWQhDt2J1nXRqT0BRzAsix2Jg35WVbX+zzmVEd/S6qDddt9BuVh1s1ot7KYdVbJc87uUhrgFbHvFo3q1on7pffpsRupJhBkrT9Kas2cC3RNoqDEiqzXPDMcboMbaf9egujo2bq+4W643Mar9HRJcY7XB5vaEc055PR+1ZN7XsM4IiARzgru4JVJGqcIdQYHOTbhssy9rrR9vSoFFjObAMIIcMJVEwODrfKOabiz9vmdHobi2sc/Vucq+a05jA0JqRFoyR02fJQSbyw7xJ2wFAAvd5OylvcJ2CKTQsu+0vX0IxdfZjjIGpDZJbQzeAL4s84rTsbhgYdGs1LKuzA7/7pMaz6s4S9b9jqjPDsBEdOQpy2NISRTynUePFzxvA3YtEVHzWWl/rBjbWnM8+KNlGAL3gDXBDxWZvDwCP8byOad5IGyTfrwiXk6rvXoeCxF2TFHXWs6LtINjDCOGMXMEnELE0LMHIN8l7IzcnFhdq8nBeWzCW5CFeI1MelGE/tu4+nEOLy+WtveL2zvFGETIj7JuDcCTUwn9QOWI1S4w3abizaHcBXJSzJ6dOZVzBzjBKQRXSsDgnH6RDIUut72U9D66YWda54=
+  file: chrome-bisect-$CBVERSION-*
+  on:
+    repo: jay0lee/chrome-bisect
