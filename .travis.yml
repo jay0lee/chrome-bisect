@@ -16,8 +16,6 @@ matrix:
             python@2
     - os: windows
       language: shell
-    - os: windows
-      language: shell
 
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
