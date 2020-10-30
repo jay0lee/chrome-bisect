@@ -14,8 +14,8 @@ it will ask you whether it is good or bad before continuing the search.
 
 from __future__ import print_function
 
-__version__ = '1.10
-'
+__version__ = '1.10'
+
 # The base URL for stored build archives.
 CHROMIUM_BASE_URL = ('http://commondatastorage.googleapis.com'
                      '/chromium-browser-snapshots')
@@ -1214,8 +1214,23 @@ def main():
                          'before proceeding with the bisect.')
   parser.add_option("-r", action="callback", callback=error_internal_option)
   parser.add_option("-o", action="callback", callback=error_internal_option)
+  parser.add_option('-v', '--version',
+                    dest='version',
+                    action='store_true',
+                    help='Show version information and exit.')
+  parser.add_option('--short-version',
+                    dest='shortversion',
+                    action='store_true',
+                    help='Output only version number.')
 
   (opts, args) = parser.parse_args()
+
+  if opts.version:
+    print('Chrome Bisect %s' % __version__)
+    sys.exit(0)
+  elif opts.shortversion:
+    sys.stdout.write(__version__)
+    sys.exit(0)
 
   if opts.archive is None:
     print('Error: missing required parameter: --archive')

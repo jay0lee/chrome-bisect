@@ -50,9 +50,6 @@ if [[ "$PLATFORM" == "x86_64" ]]; then
   cp -v /c/python/DLLs/libcrypto-1_1-x64.dll /c/python/DLLs/libcrypto-1_1.dll
 fi
 
-# WIX Toolset
-until cinst -y wixtoolset; do echo "trying wix install again..."; done
-
 cd $mypath
 
 $pip install --upgrade pip
