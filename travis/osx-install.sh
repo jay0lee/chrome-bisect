@@ -5,7 +5,7 @@ rm -rf $mypath
 $python -OO -m PyInstaller --clean --noupx --strip -F --distpath $mypath chrome-bisect.spec
 export me="$mypath/chrome-bisect"
 $me --version
-export MYVERSION=`$me --version`
+export MYVERSION=`$me --short-version`
 cp LICENSE $mypath
 MACOSVERSION=$(defaults read loginwindow SystemVersionStampAsString)
 MY_ARCHIVE=chrome-bisect-$MYVERSION-$MYOS-$PLATFORM-MacOS$MACOSVERSION.tar.xz
