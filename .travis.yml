@@ -1,45 +1,46 @@
 if: tag IS blank
-matrix:
+os: linux
+language: python
+dist: xenial
+env:
+  global:
+  - BUILD_PYTHON_VERSION=3.9.0
+  - MIN_PYTHON_VERSION=3.9.0
+  - BUILD_OPENSSL_VERSION=1.1.1h
+  - MIN_OPENSSL_VERSION=1.1.1h
+  - PATCHELF_VERSION=0.11
+  - PYINSTALLER_COMMIT=1e571ae1a302709583667f41fbc2508b9a79a05f
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+  - "$HOME/python"
+  - "$HOME/ssl"
+jobs:
   include:
   - os: linux
-    language: python
-    dist: precise
-    python:
-    - 2.7.15
+    name: Linux 64-bit Xenial
+    dist: xenial
+    language: shell
   - os: osx
+    name: MacOS 10.13
     language: generic
     osx_image: xcode10.1
-    addons:
-      homebrew:
-        packages: python@2
   - os: windows
+    name: Windows 64-bit
+    language: shell
+  - os: windows
+    name: Windows 32-bit
     language: shell
 
 before_install:
-- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-    powershell Install-WindowsFeature Net-Framework-Core;
-    cinst -y --forcex86 python2;
-    export PATH=$PATH:/c/Python27/scripts;
-    cinst -y wixtoolset;
-  fi
-- pip install pyinstaller
-- pip install -r requirements.txt
+- if [ "${TRAVIS_OS_NAME}" == "osx" ]; then export MYOS="macos"; else export MYOS="${TRAVIS_OS_NAME}"; fi
+- if [ "${TRAVIS_JOB_NAME}" == "Windows 32-bit" ]; then export PLATFORM="x86"; elif
+  [ "${TRAVIS_CPU_ARCH}" == "amd64" ]; then export PLATFORM="x86_64"; else export
+  PLATFORM="${TRAVIS_CPU_ARCH}"; fi
+- source travis/${TRAVIS_OS_NAME}-before-install.sh
 
 install:
-- pyinstaller --clean -F --distpath=chrome-bisect $TRAVIS_OS_NAME.spec
-- chrome-bisect/chrome-bisect --version
-- export CBVERSION=`chrome-bisect/chrome-bisect --short-version`
-- cp LICENSE chrome-bisect
-- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-    ARCHIVE=chrome-bisect-$CBVERSION-$TRAVIS_OS_NAME.zip;
-    /c/Program\ Files/7-Zip/7z.exe a -tzip $ARCHIVE chrome-bisect -xr!.svn;
-    /c/Program\ Files\ \(x86\)/WiX\ Toolset\ v3.11/bin/candle.exe -arch x86 chrome-bisect.wxs;
-    /c/Program\ Files\ \(x86\)/Wix\ Toolset\ v3.11/bin/light.exe -ext /c/Program\ Files\ \(x86\)/WiX\ Toolset\ v3.11/bin/WixUIExtension.dll chrome-bisect.wixobj -o chrome-bisect-$CBVERSION-windows.msi || true;
-    rm *.wixpdb;
-  else
-    CBARCHIVE=chrome-bisect-$CBVERSION-$TRAVIS_OS_NAME.tar.xz;
-    tar cfJ $CBARCHIVE chrome-bisect/;
-  fi
+- source travis/${TRAVIS_OS_NAME}-install.sh
 
 script:
 - chrome-bisect/chrome-bisect --version
