@@ -62,14 +62,14 @@ jobs:
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
-        if: matrix.os != "windows-latest" # Mac/Linux upload
+        if: matrix.os != 'windows-latest' # Mac/Linux upload
         with:
           name: chrome-bisect-${{ matrix.os }}
           path: |
             chrome-bisect-*
           
       - name: Download artifacts
-        if: matrix.os == "windows-latest # Windows download
+        if: matrix.os == 'windows-latest' # Windows download
         uses: actions/download-artifact@v2
         with:
           path: ~/chrome-bisect/chrome-bisect/
