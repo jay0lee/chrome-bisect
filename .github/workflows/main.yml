@@ -1,4 +1,4 @@
-name: GitHub Actions Hello World
+name: Build Chrome Bisect Script
 
 on:
   push:
@@ -38,10 +38,21 @@ jobs:
         
       - name: Compile bisect script
         run: pyinstaller -F bisect-builds.py
+      
+      - name: Env vars
+        run: set
+  
+      - name: Rename *nix binary
+        run: mv dist/bisect-builds chrome-bisect-${{ matrix.os }}
+        if: matrix.os != 'windows-latest'
+      
+      - name: Rename Windows binary
+        run: mv dist/bisect-builds.exe  chrome-bisect-windows
+        if: matrix.os == 'windows-latest'
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
           name: chrome-bisect-${{ matrix.os }}
           path: |
-            dist/*
+            chrome-bisect*
