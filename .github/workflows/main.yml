@@ -72,8 +72,10 @@ jobs:
           path: ~/chrome-bisect/
 
       - uses: "marvinpinto/action-automatic-releases@latest"
+        if: matrix.os == 'windows-latest' # Windows runs last and uploads release
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
           prerelease: false
           draft: false
           title: "Chrome Bisect"
