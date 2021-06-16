@@ -38,10 +38,10 @@ jobs:
         
       - name: Compile bisect script
         run: pyinstaller -F bisect-builds.py
-        
-       - name: Archive production artifacts
-         uses: actions/upload-artifact@v2
-         with:
-           name: chrome-bisect-${{ matrix.os }}
-           path: |
-             dist/*
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: chrome-bisect-${{ matrix.os }}
+          path: |
+            dist/*
