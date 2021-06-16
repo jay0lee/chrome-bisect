@@ -73,6 +73,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: ~/
+      
+      - name: show artifacts
+        if: matrix.os == 'windows-latest'
+        run: |
+          ls -alRF ~
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         if: matrix.os == 'windows-latest' # Windows runs last and uploads release
@@ -84,5 +89,5 @@ jobs:
           title: "Chrome Bisect"
           files: |
             chrome-bisect-windows.exe
-            ~/chrome-bisect-macos-latest/chrome-bisect-macos
-            ~/chrome-bisect-ubuntu-18.04/chrome-bisect-linux
+            ~/chrome-bisect-macos-latest/*
+            ~/chrome-bisect-ubuntu-18.04/*
