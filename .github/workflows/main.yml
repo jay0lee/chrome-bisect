@@ -81,8 +81,8 @@ jobs:
           ls -l .
           mv ~/chrome-bisect-macos-latest ~/chrome-bisect-macos-latest.zip
           mv ~/chrome-bisect-ubuntu-18.04 ~/chrome-bisect-ubuntu-18.04.zip
-          unzip ~/chrome-bisect-macos-latest.zip
-          unzip ~/chrome-bisect-ubuntu-18.04.zip
+          tar xvvf ~/chrome-bisect-macos-latest.zip
+          tar xvvf ~/chrome-bisect-ubuntu-18.04.zip
           ls -l ~
           ls -l .
   
