@@ -72,7 +72,7 @@ jobs:
         if: matrix.os == 'windows-latest' # Windows download
         uses: actions/download-artifact@v2
         with:
-          path: /d/a/chrome-bisect/chrome-bisect
+          path: ~/
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         if: matrix.os == 'windows-latest' # Windows runs last and uploads release
@@ -83,4 +83,6 @@ jobs:
           draft: false
           title: "Chrome Bisect"
           files: |
-            chrome-bisect-*
+            chrome-bisect-windows.exe
+            ~/chrome-bisect-macos
+            ~/chrome-bisect-linux
