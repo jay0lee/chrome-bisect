@@ -74,6 +74,13 @@ jobs:
         with:
           path: ~/
 
+      - name: Extract artifacts
+        if: matrix.os == 'windows-latest'
+        run: |
+          unzip ~/chrome-bisect-*
+          ls -l ~
+          ls -l .
+  
       - uses: "marvinpinto/action-automatic-releases@latest"
         if: matrix.os == 'windows-latest' # Windows runs last and uploads release
         with:
