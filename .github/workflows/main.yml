@@ -29,3 +29,19 @@ jobs:
       
       - name: Install PyInstaller
         run: pip3 install pyinstaller
+        
+      - name: Install requirements
+        run: pip3 install -r requirements.txt
+        
+      - name: Download bisect script
+        run: curl -s --basic -n "https://chromium.googlesource.com/chromium/src/+/master/tools/bisect-builds.py?format=TEXT" | base64 -d > bisect-builds.py
+        
+      - name: Compile bisect script
+        run: pyinstaller -F bisect-builds.py
+        
+       - name: Archive production artifacts
+         uses: actions/upload-artifact@v2
+         with:
+           name: chrome-bisect-${{ matrix.os }}
+           path: |
+             dist/*
