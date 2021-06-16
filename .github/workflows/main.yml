@@ -47,7 +47,7 @@ jobs:
         if: matrix.os != 'windows-latest'
       
       - name: Rename Windows binary
-        run: mv dist/bisect-builds.exe  chrome-bisect-windows
+        run: mv dist/bisect-builds.exe  chrome-bisect-windows.exe
         if: matrix.os == 'windows-latest'
 
       - name: Archive production artifacts
