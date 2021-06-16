@@ -10,9 +10,6 @@ defaults:
   run:
     shell: bash
 
-env:
-  PYINSTALLER_VERSION: "98aa4508455f3baaa8f15754ae5c95ee0e32806e"
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -28,4 +25,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.9.5
-      - run: python -V
+      - run: python3 -V
+      
+      - name: Install PyInstaller
+        run: pip3 install pyinstaller
