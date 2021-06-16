@@ -60,16 +60,19 @@ jobs:
           ./chrome-bisect-* --help
           pwd
 
-      - name: Archive production artifacts
+      - name: upload artifacts
         uses: actions/upload-artifact@v2
+        if: matrix.os != "windows-latest" # Mac/Linux upload
         with:
           name: chrome-bisect-${{ matrix.os }}
           path: |
             chrome-bisect-*
           
-      - uses: actions/download-artifact@v2
+      - name: Download artifacts
+        if: matrix.os == "windows-latest # Windows download
+        uses: actions/download-artifact@v2
         with:
-          path: ~/chrome-bisect/
+          path: ~/chrome-bisect/chrome-bisect/
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         if: matrix.os == 'windows-latest' # Windows runs last and uploads release
