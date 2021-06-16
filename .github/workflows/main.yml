@@ -64,10 +64,10 @@ jobs:
           name: chrome-bisect-${{ matrix.os }}
           path: |
             chrome-bisect-*
-  
-      - name: Download other job artifacts
-        uses: actions/download-artifact@v2
-        path: ~/
+          
+      - uses: actions/download-artifact@v2
+        with:
+          path: ~/chrome-bisect/
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
