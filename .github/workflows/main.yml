@@ -67,7 +67,7 @@ jobs:
   
       - name: Download other job artifacts
         uses: actions/download-artifact@v2
-        path: ~
+        path: ~/
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
