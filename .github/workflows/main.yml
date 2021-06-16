@@ -56,7 +56,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         
       - name: Run binary
-        run: ./chrome-bisect-* --help
+        run: |
+          ./chrome-bisect-* --help
+          pwd
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
@@ -72,7 +74,8 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
+          prerelease: false
+          draft: false
           title: "Chrome Bisect"
           files: |
             chrome-bisect-*
