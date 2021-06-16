@@ -77,8 +77,12 @@ jobs:
       - name: Extract artifacts
         if: matrix.os == 'windows-latest'
         run: |
-          unzip ~/chrome-bisect-macos-latest
-          unzip ~/chrome-bisect-ubuntu-18.04
+          ls -l ~
+          ls -l .
+          mv ~/chrome-bisect-macos-latest ~/chrome-bisect-macos-latest.zip
+          mv ~/chrome-bisect-ubuntu-18.04 ~/chrome-bisect-ubuntu-18.04.zip
+          unzip ~/chrome-bisect-macos-latest.zip
+          unzip ~/chrome-bisect-ubuntu-18.04.zip
           ls -l ~
           ls -l .
   
