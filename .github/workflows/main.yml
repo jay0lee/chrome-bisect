@@ -74,18 +74,6 @@ jobs:
         with:
           path: ~/
 
-      - name: Extract artifacts
-        if: matrix.os == 'windows-latest'
-        run: |
-          ls -l ~
-          ls -l .
-          mv ~/chrome-bisect-macos-latest ~/chrome-bisect-macos-latest.zip
-          mv ~/chrome-bisect-ubuntu-18.04 ~/chrome-bisect-ubuntu-18.04.zip
-          tar xvvf ~/chrome-bisect-macos-latest.zip
-          tar xvvf ~/chrome-bisect-ubuntu-18.04.zip
-          ls -l ~
-          ls -l .
-  
       - uses: "marvinpinto/action-automatic-releases@latest"
         if: matrix.os == 'windows-latest' # Windows runs last and uploads release
         with:
@@ -96,5 +84,5 @@ jobs:
           title: "Chrome Bisect"
           files: |
             chrome-bisect-windows.exe
-            ~/chrome-bisect-macos
-            ~/chrome-bisect-linux
+            ~/chrome-bisect-macos-latest/chrome-bisect-macos
+            ~/chrome-bisect-ubuntu-18.04/chrome-bisect-linux
