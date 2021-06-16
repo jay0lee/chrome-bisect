@@ -1,17 +1,17 @@
-# This is a basic workflow to help you get started with Actions
+name: GitHub Actions Hello World
 
-name: build
-
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
+  schedule:
+    - cron: '30 20 * * *'
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYINSTALLER_VERSION: "98aa4508455f3baaa8f15754ae5c95ee0e32806e"
 
 jobs:
   build:
@@ -23,9 +23,9 @@ jobs:
           - os: macos-latest
           - os: windows-latest
 
-  steps:
-    - uses: actions/checkout@v2
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-      run: python -V
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.0-alpha - 3.9.0' # SemVer's version range syntax
+      - run: python -V
