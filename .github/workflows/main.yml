@@ -43,12 +43,15 @@ jobs:
         run: set
   
       - name: Rename *nix binary
-        run: mv dist/bisect-builds chrome-bisect-${{ matrix.os }}
+        run: mv dist/bisect-builds chrome-bisect
         if: matrix.os != 'windows-latest'
       
       - name: Rename Windows binary
-        run: mv dist/bisect-builds.exe  chrome-bisect-windows.exe
+        run: mv dist/bisect-builds.exe  chrome-bisect.exe
         if: matrix.os == 'windows-latest'
+        
+      - name: Run binary
+        run: ./chrome-bisect --help
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
