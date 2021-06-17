@@ -72,18 +72,14 @@ jobs:
         if: matrix.os == 'windows-latest' # Windows download
         uses: actions/download-artifact@v2
         
-      - name: show artifacts
-        if: matrix.os == 'windows-latest'
-        run: |
-          ls -alRF .
-
       - name: Set datetime version string
+        if: matrix.os == 'windows-latest'
         id: dateversion
         run: |
           echo "::set-output name=dateversion::$(date +'%Y%m%d.%k%M%S')"
 
       - uses: "marvinpinto/action-automatic-releases@latest"
-        if: matrix.os == 'windows-latest' # Windows runs last and uploads release
+        if: matrix.os == 'windows-latest'
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: ${{ steps.dateversion.outputs.dateversion }}
