@@ -80,7 +80,7 @@ jobs:
       - name: Set datetime version string
         id: dateversion
         run: |
-          run: echo "::set-output name=dateversion::$(date +'%Y%m%d.%k%M%S')"
+          echo "::set-output name=dateversion::$(date +'%Y%m%d.%k%M%S')"
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         if: matrix.os == 'windows-latest' # Windows runs last and uploads release
