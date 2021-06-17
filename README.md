@@ -1,5 +1,5 @@
 # Chrome Bisect
-Chrome Bisect is a fork of the [bisect-builds.py tool](https://www.chromium.org/developers/bisect-builds-py). It's goal is to make it easy for IT admins to determine when Chrome browser began behaving differently and why it did so (deprecation, regression bug, etc).
+Chrome Bisect is a packaging of the [bisect-builds.py tool](https://www.chromium.org/developers/bisect-builds-py). It's goal is to make it easy for IT admins to determine when Chrome browser began behaving differently and why it did so (deprecation, regression bug, etc).
 
 [![Build Chrome Bisect Script](https://github.com/jay0lee/chrome-bisect/actions/workflows/main.yml/badge.svg)](https://github.com/jay0lee/chrome-bisect/actions/workflows/main.yml)
 
