@@ -77,14 +77,19 @@ jobs:
         run: |
           ls -alRF .
 
+      - name: Set datetime version string
+        id: dateversion
+        run: |
+          run: echo "::set-output name=dateversion::$(date +'%Y%m%d.%k%M%S')"
+
       - uses: "marvinpinto/action-automatic-releases@latest"
         if: matrix.os == 'windows-latest' # Windows runs last and uploads release
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
+          automatic_release_tag: ${{ steps.dateversion.outputs.dateversion }}
           prerelease: false
           draft: false
-          title: "Chrome Bisect"
+          title: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
           files: |
             chrome-bisect-windows.exe
             chrome-bisect-macos-latest/*
