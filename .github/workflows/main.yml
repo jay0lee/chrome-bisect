@@ -39,9 +39,10 @@ jobs:
         
       - name: Compile bisect script
         run: |
-          pyinstaller --distpath chrome-bisect --name chrome-bisect bisect-builds.py
+          pyinstaller --name chrome-bisect bisect-builds.py
+          mv dist/chrome-bisect .
           ls -al chrome-bisect/
-          chrome-bisect/chrome-bisect/chrome-bisect --help
+          chrome-bisect/chrome-bisect --help
           case "$(uname)" in
             "Linux") osname=linux;;
             "Darwin") osname=macos;;
@@ -49,7 +50,11 @@ jobs:
           esac
           export archivefile="chrome-bisect-${osname}.zip"
           echo "archive file will be ${archivefile} when zipped."
-          zip -r $archivefile chrome-bisect/
+          if [ "${osname}" == 'windows' ]; then
+            /c/Program\ Files/7-Zip/7z.exe a -tzip $archivefile chrome-bisect/
+          else
+            zip -r $archivefile chrome-bisect/
+          fi
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
