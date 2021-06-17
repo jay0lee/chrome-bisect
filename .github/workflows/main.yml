@@ -46,7 +46,9 @@ jobs:
             "Darwin") os=macos;;
             *) os=windows;;
           esac
-          zip -r "chrome-bisect-${os}.zip" chrome-bisect/chrome-bisect
+          archivefile="chrome-bisect-${os}.zip"
+          echo "archive file will be ${archivefile} when zipped."
+          zip -r $archivefile chrome-bisect/
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
