@@ -38,15 +38,24 @@ jobs:
           echo "Downloading ${url}"
           curl -o pyinstaller.tar.gz --compressed "${url}"
           tar xf pyinstaller.tar.gz
-          echo "BEFORE COMPILE"
-          sha1sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
+          case "$(uname)" in
+            "Linux") osname=linux;;
+            "Darwin") osname=macos;;
+            *) osname=windows;;
+          esac
+          if [ $osname == "windows" ]; then
+            echo "BEFORE COMPILE"
+            sha1sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
+          fi
           cd "pyinstaller-${PYINSTALLER_VERSION}/bootloader"
           python3 ./waf all
           cd ..
           python3 setup.py install
           cd ..
-          echo "AFTER COMPILE"
-          sha1sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
+          if [ $osname == "windows" ]; then
+            echo "AFTER COMPILE"
+            sha1sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
+          fi
 
       - name: Install requirements
         run: pip3 install -r requirements.txt
