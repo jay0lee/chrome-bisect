@@ -10,6 +10,10 @@ defaults:
   run:
     shell: bash
 
+env:
+  # PYINSTALLER_VERSION can be full commit hash or version like v4.20
+  PYINSTALLER_VERSION: "v4.3"
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -29,8 +33,16 @@ jobs:
       - run: python3 -V
       
       - name: Install PyInstaller
-        run: pip3 install pyinstaller
-        
+        run: |
+          export url="https://codeload.github.com/pyinstaller/pyinstaller/tar.gz/${PYINSTALLER_VERSION}"
+          echo "Downloading ${url}"
+          curl -o pyinstaller.tar.gz --compressed "${url}"
+          tar xf pyinstaller.tar.gz
+          cd "pyinstaller-${PYINSTALLER_VERSION}/bootloader"
+          python3 ./waf all
+          cd ..
+          python3 setup.py install
+
       - name: Install requirements
         run: pip3 install -r requirements.txt
         
