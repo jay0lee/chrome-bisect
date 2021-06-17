@@ -39,14 +39,14 @@ jobs:
           curl -o pyinstaller.tar.gz --compressed "${url}"
           tar xf pyinstaller.tar.gz
           echo "BEFORE COMPILE"
-          md5sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
+          sha1sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
           cd "pyinstaller-${PYINSTALLER_VERSION}/bootloader"
           python3 ./waf all
           cd ..
           python3 setup.py install
           cd ..
           echo "AFTER COMPILE"
-          md5sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
+          sha1sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
 
       - name: Install requirements
         run: pip3 install -r requirements.txt
