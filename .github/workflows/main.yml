@@ -12,7 +12,7 @@ defaults:
 
 env:
   # PYINSTALLER_VERSION can be full commit hash or version like v4.20
-  PYINSTALLER_VERSION: "v4.3"
+  PYINSTALLER_VERSION: "4.3"
 
 jobs:
   build:
@@ -34,14 +34,19 @@ jobs:
       
       - name: Install PyInstaller
         run: |
-          export url="https://codeload.github.com/pyinstaller/pyinstaller/tar.gz/${PYINSTALLER_VERSION}"
+          export url="https://codeload.github.com/pyinstaller/pyinstaller/tar.gz/v${PYINSTALLER_VERSION}"
           echo "Downloading ${url}"
           curl -o pyinstaller.tar.gz --compressed "${url}"
           tar xf pyinstaller.tar.gz
+          echo "BEFORE COMPILE"
+          md5sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
           cd "pyinstaller-${PYINSTALLER_VERSION}/bootloader"
           python3 ./waf all
           cd ..
           python3 setup.py install
+          cd ..
+          echo "AFTER COMPILE"
+          md5sum pyinstaller-$PYINSTALLER_VERSION/PyInstaller/bootloader/*/*
 
       - name: Install requirements
         run: pip3 install -r requirements.txt
