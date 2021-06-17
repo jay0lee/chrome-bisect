@@ -38,27 +38,15 @@ jobs:
         run: curl -s --basic -n "https://chromium.googlesource.com/chromium/src/+/master/tools/bisect-builds.py?format=TEXT" | base64 -d > bisect-builds.py
         
       - name: Compile bisect script
-        run: pyinstaller -F bisect-builds.py
-      
-      - name: Env vars
-        run: set
-  
-      - name: Rename Linix binary
-        run: mv dist/bisect-builds chrome-bisect-macos
-        if: matrix.os == 'ubuntu-18.04'
-
-      - name: Rename MacOS binary
-        run: mv dist/bisect-builds chrome-bisect-linux
-        if: matrix.os == 'macos-latest'
-
-      - name: Rename Windows binary
-        run: mv dist/bisect-builds.exe  chrome-bisect-windows.exe
-        if: matrix.os == 'windows-latest'
-        
-      - name: Run binary
         run: |
-          ./chrome-bisect-* --help
-          pwd
+          pyinstaller --dist-path chrome-bisect --name chrome-bisect bisect-builds.py
+          chrome-bisect/chrome-bisect --help
+          case "$(uname)" in
+            "Linux") os=linux;;
+            "Darwin") os=macos;;
+            *) os=windows;;
+          esac
+          zip -r "chrome-bisect-${os}.zip" chrome-bisect/
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
@@ -66,8 +54,8 @@ jobs:
         with:
           name: chrome-bisect-${{ matrix.os }}
           path: |
-            chrome-bisect-*
-          
+            chrome-bisect-*.zip
+
       - name: Download artifacts
         if: matrix.os == 'windows-latest' # Windows download
         uses: actions/download-artifact@v2
@@ -87,6 +75,6 @@ jobs:
           draft: false
           title: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
           files: |
-            chrome-bisect-windows.exe
+            chrome-bisect-windows.zip
             chrome-bisect-macos-latest/*
             chrome-bisect-ubuntu-18.04/*
