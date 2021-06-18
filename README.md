@@ -20,9 +20,9 @@ You need to know a few things before you run Chrome Bisect effectively:
 Once you know these details, go ahead and run Chrome Bisect. Use `chrome-bisect --help` to understand all the proper arguments. Here's a sample command:
 
 ```
-chrome_bisect --use-local-cache --verify-range --good M85 --bad M90 --archive linux64 -- https://www.google.com/`
+chrome_bisect --good M85 --bad M90 -- https://www.google.com/`
 ```
-* If no options are specified, the following defaults will be used:
+* the following defaults will be used if not manually specified:
 ```
     --use-local-cache --verify-range --good <latest stable version minus 6> --bad <latest canary version>
 ```
