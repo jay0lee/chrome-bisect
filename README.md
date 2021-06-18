@@ -4,18 +4,11 @@ Chrome Bisect is a packaging of the [bisect-builds.py tool](https://www.chromium
 [![Build Chrome Bisect Script](https://github.com/jay0lee/chrome-bisect/actions/workflows/main.yml/badge.svg)](https://github.com/jay0lee/chrome-bisect/actions/workflows/main.yml)
 
 # Quick Start
-## Linux / MacOS
-Open a terminal and run:
-```
-bash <(curl -s -S -L https://raw.githubusercontent.com/jay0lee/chrome-bisect/master/install.sh)
-```
-this will download Chrome Bisect and install it.
-## Windows
-Download the MSI Installer from the [GitHub Releases](https://github.com/jay0lee/chrome-bisect/releases) page. Install the MSI.
+Download the [latest release](https://github.com/jay0lee/chrome-bisect/releases) for your OS, extract it and run chrome_bisect.
 
 # Running Chrome Bisect
-You need to know a few things before you run Chrome Bisect
-* Exact steps to reproduce (recreate) the issue you are having with Chrome. This would look something like:
+You need to know a few things before you run Chrome Bisect effectively:
+* Exact, minimal steps to reproduce (recreate) the issue you are having with Chrome. This would look something like:
   * Visit http://www.example.com
   * Log in.
   * Browse to Products > Widgets page
@@ -24,25 +17,29 @@ You need to know a few things before you run Chrome Bisect
 * The last version of Chrome browser where you DID NOT SEE this issue. This can be a major Chrome release number like M65.
 * The first version of Chrome browser where you DID SEE the issue. This can be a major Chrome release number like M66.
 
-Once you know these details, go ahead and run Chrome Bisect. Use `chrome-bisect --help` to understand all the proper arguments. I recommend adding `--use-local-cache --verify-range` for a better experience. Here's a sample command:
+Once you know these details, go ahead and run Chrome Bisect. Use `chrome-bisect --help` to understand all the proper arguments. Here's a sample command:
 
 ```
-chrome-bisect --use-local-cache --verify-range --good M85 --bad M90 --archive linux64 -- https://www.google.com/`
+chrome_bisect --use-local-cache --verify-range --good M85 --bad M90 --archive linux64 -- https://www.google.com/`
 ```
-* The tool will download numerous Chromium browser builds for you to test with. Each was built chronologically sometime between the two milestone versions you specified for good and bad. This allows the tool to narrow down when the change that broke you occurred.
+* If no options are specified, the following defaults will be used:
+```
+    --use-local-cache --verify-range --good <latest stable version minus 6> --bad <latest canary version>
+```
+* The tool will download numerous Chromium browser builds for you to test with. Each version was built chronologically sometime between the two milestone versions you specified for good and bad. This allows the tool to narrow down when the change that broke you occurred.
 * Each time Chromium browser runs on your machine, try to reproduce the issue. If you cannot reproduce the issue, this version of Chromium is considered "good". If you can reproduce the issue, this version of Chromium is considered "bad".
 * Once you exit a Chromium browser, the tool will prompt you to mark the build as good or bad. Be sure to enter accurate information or the results will be wrong.
 * You can also retry a given Chromium build or quit completely if you think there are other issues.
-* Depending on the range of Chromium builds you specified as known good and known bad, you'll need to keep on testing additional builds until the range is narrowed down as tightly as possible. This may mean running a dozen or more builds of Chromium which is why you want to get the reproduction steps as short as possible.
-* Once the tool has a precise good then bad build range, it will let you know and provide you with a URL that shows you all of the changes to Chromium browser between the two builds. With this information, you may be able to narrow down why the change was made that caused your issue.
+* Depending on the range of Chromium builds you specified as known good and known bad, you'll need to keep on testing additional builds until the range is narrowed down as tightly as possible. This will mean running a dozen or more builds of Chromium which is why you want to get the reproduction steps as short as possible.
+* Once the tool has a precise good vs bad build range, it will let you know and provide you with a URL that shows you all of the changes to Chromium browser between the two builds. With this information, you may be able to narrow down why the change was made that caused your issue.
   * Please be aware that not every issue you face is a regression bug in Chrome. For security and stability reasons, the browser regularly removes deprecated features / functionality. It may be on you to upgrade your site or environment to meet the new browser requirements.
   * If you still believe the issue is a regression bug in Chrome browser, please file an issue at crbug.com and/or open a Enterprise support case with full details including the log generated by Chrome Bisect.
   
  # An example Chrome Bisect
  Let's pretend you own the site https://tls-v1-1.badssl.com/ and that you've noticed it stopped working with Chrome 90 was released (from the site name or error returned by the page, you may already know why it stopped working but let's pretend you don't).
-  1. Run Chrome Bisect. You may need to specify a different archive value (mac, mac64, mac-arm, win, win64, linux, linux64, linux-arm or chromeos):
+  1. Run Chrome Bisect:
 
-```chrome-bisect --use-local-cache --verify-range --good M89 --bad M90 --archive linux64 -- https://tls-v1-1.badssl.com/```
+```chrome_bisect --good M85```
 
   2. The tool will start downloading Chromium builds. If the Chromium build launches and a red page with text from the website loads properly, exit the browser and mark the build as good. If you see a connection error and the browser fails to load the site, mark the build as bad.
   3. The tool will need to download and run about a dozen builds to narrow the build scope as tightly as possible. Keep marking builds as good or bad until the tool finishes.
