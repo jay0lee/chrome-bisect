@@ -55,4 +55,4 @@ As mentioned above, Chrome Bisect has a few limitations that you should be aware
      * The PDF Viewer
      * Adobe Flash Player
      * Widevine DRM
-* Currently the tool does not not support Chrome OS. If you have an issue on Chrome OS try reproducing it in Chrome browser on Windows, Mac or Linux and see if you can utilize the tool there.
+* If you have an issue on Chrome OS try reproducing it in Chrome browser on Windows, Mac or Linux and see if you can utilize the tool there. The tool does support `--archive chromeos` on Linux which runs like Chrome OS but is not really full Chrome OS, your mileage may vary.
