@@ -41,16 +41,17 @@ jobs:
           esac
           if [ $osname == "windows" ]; then
             echo "BEFORE COMPILE"
-            sha1sum pyinstaller-*/bootloader/*/*
+            sha1sum pyinstaller-*/Pyinstaller/bootloader/*/*
           fi
-          cd "pyinstaller-*/bootloader"
+          ls -l
+          cd pyinstaller-*/bootloader
           python3 ./waf all
           cd ..
           python3 setup.py install
           cd ..
           if [ $osname == "windows" ]; then
             echo "AFTER COMPILE"
-            sha1sum pyinstaller-*/bootloader/*/*
+            sha1sum pyinstaller-*/PyInstaller/bootloader/*/*
           fi
 
       - name: Install requirements
