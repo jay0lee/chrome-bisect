@@ -10,10 +10,6 @@ defaults:
   run:
     shell: bash
 
-env:
-  # PYINSTALLER_VERSION can be full commit hash or version like v4.20
-  PYINSTALLER_VERSION: "4.3"
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -34,7 +30,7 @@ jobs:
       
       - name: Install PyInstaller
         run: |
-          export url="https://codeload.github.com/pyinstaller/pyinstaller/tar.gz/v${PYINSTALLER_VERSION}"
+          export url="https://codeload.github.com/pyinstaller/pyinstaller/tar.gz/refs/heads/develop"
           echo "Downloading ${url}"
           curl -o pyinstaller.tar.gz --compressed "${url}"
           tar xf pyinstaller.tar.gz
