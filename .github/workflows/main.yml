@@ -33,7 +33,7 @@ jobs:
           export url="https://codeload.github.com/pyinstaller/pyinstaller/tar.gz/refs/heads/develop"
           echo "Downloading ${url}"
           curl -o pyinstaller.tar.gz --compressed "${url}"
-          tar xf pyinstaller.tar.gz
+          tar xvvf pyinstaller.tar.gz
           case "$(uname)" in
             "Linux") osname=linux;;
             "Darwin") osname=macos;;
