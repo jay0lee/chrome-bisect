@@ -30,6 +30,7 @@ jobs:
       
       - name: Install PyInstaller
         run: |
+          pip install wheels
           export url="https://codeload.github.com/pyinstaller/pyinstaller/tar.gz/refs/heads/develop"
           echo "Downloading ${url}"
           curl -o pyinstaller.tar.gz --compressed "${url}"
