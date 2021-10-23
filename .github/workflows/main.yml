@@ -64,7 +64,7 @@ jobs:
       - name: Compile bisect script
         run: |
           export distpath=chrome_bisect/
-          pyinstaller -F --distpath $distpath chrome_bisect.py
+          python3 -m PyInstaller -F --distpath $distpath chrome_bisect.py
           $distpath/chrome_bisect --help
           case "$(uname)" in
             "Linux") osname=linux;;
