@@ -52,7 +52,7 @@ jobs:
           pip3 install --user .
           if [ $osname == "windows" ]; then
             echo "AFTER COMPILE"
-            sha1sum pyinstaller-*/PyInstaller/bootloader/*/*
+            sha1sum PyInstaller/bootloader/*/*
           fi
 
       - name: Install requirements
