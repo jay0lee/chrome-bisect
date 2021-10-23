@@ -48,8 +48,8 @@ jobs:
           ls -l
           cd pyinstaller-*/bootloader
           python3 ./waf all
-          pip3 install --user .
           cd ..
+          pip3 install --user .
           if [ $osname == "windows" ]; then
             echo "AFTER COMPILE"
             sha1sum pyinstaller-*/PyInstaller/bootloader/*/*
