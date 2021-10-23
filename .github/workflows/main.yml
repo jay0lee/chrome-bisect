@@ -30,8 +30,8 @@ jobs:
       
       - name: Install PyInstaller
         run: |
-          pip install --upgrade pip
-          pip install wheel
+          pip install --upgrade --user pip
+          pip install --user wheel
           export url="https://codeload.github.com/pyinstaller/pyinstaller/tar.gz/refs/heads/develop"
           echo "Downloading ${url}"
           curl -o pyinstaller.tar.gz --compressed "${url}"
@@ -48,8 +48,7 @@ jobs:
           ls -l
           cd pyinstaller-*/bootloader
           python3 ./waf all
-          cd ..
-          python3 setup.py install
+          pip3 install --user .
           cd ..
           if [ $osname == "windows" ]; then
             echo "AFTER COMPILE"
@@ -57,7 +56,7 @@ jobs:
           fi
 
       - name: Install requirements
-        run: pip3 install -r requirements.txt
+        run: pip3 install --user -r requirements.txt
         
       - name: Download bisect script
         run: curl -s --basic -n "https://chromium.googlesource.com/chromium/src/+/master/tools/bisect-builds.py?format=TEXT" | base64 -d > bisect_builds.py
