@@ -40,7 +40,7 @@ jobs:
           cd bootloader
           export DefaultWindowsSDKVersion="10.0.20348.0"
           python3 ./waf all $TARGETARCH
-          pip3 install --user .
+          pip3 install --user ..
 
       - name: Install requirements
         run: pip3 install --user -r requirements.txt
