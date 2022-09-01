@@ -94,7 +94,7 @@ def add_default_args(args):
         args.extend(['--good', good_milestone])
 
     # fix milestones with bad build results
-    for i in range(0, len(args) - 1):
+    for i in range(0, len(args)):
         args[i] = override_milestones.get(args[i].upper(), args[i])
     return args
 
