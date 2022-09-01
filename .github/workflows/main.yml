@@ -22,10 +22,14 @@ jobs:
           - os: windows-2022
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
         with:
-          python-version: 3.10.4
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
       - run: python3 -V
       
       - name: Install PyInstaller
@@ -67,7 +71,7 @@ jobs:
           fi
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: matrix.os != 'windows-2022' # Mac/Linux upload
         with:
           name: chrome-bisect-${{ matrix.os }}
@@ -76,7 +80,7 @@ jobs:
 
       - name: Download artifacts
         if: matrix.os == 'windows-2022' # Windows download
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         
       - name: Set datetime version string
         if: matrix.os == 'windows-2022'
