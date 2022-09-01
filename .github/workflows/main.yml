@@ -58,14 +58,21 @@ jobs:
       - name: Compile bisect script
         run: |
           export distpath=chrome_bisect/
-          python3 -m PyInstaller -F --distpath $distpath chrome_bisect.py
+          case "$(uname)" in
+            "Linux")
+              osname=linux
+              ;;
+            "Darwin")
+              osname=macos
+              pyi_args="--target-arch=universal2"
+              ;;
+            *)
+              osname=windows
+              ;;
+          esac
+          python3 -m PyInstaller -F --distpath $distpath $pyi_args chrome_bisect.py
           cp roots.pem $distpath
           $distpath/chrome_bisect --help
-          case "$(uname)" in
-            "Linux") osname=linux;;
-            "Darwin") osname=macos;;
-            *) osname=windows;;
-          esac
           export archivefile="chrome-bisect-${osname}.zip"
           echo "archive file will be ${archivefile} when zipped."
           if [ "${osname}" == 'windows' ]; then
