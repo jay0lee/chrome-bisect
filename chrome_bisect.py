@@ -2,6 +2,7 @@
 
 ''' wrapper for bisect-builds.py which simplifies option setting '''
 from platform import system, machine
+import os
 import sys
 
 import requests
