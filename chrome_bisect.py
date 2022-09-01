@@ -103,6 +103,8 @@ def main():
     else:
         bisect_args = sys.argv
         chrome_args = []
+    os.environ['REQUESTS_CA_BUNDLE'] = 'roots.pem'
+    os.environ['SSL_CERT_FILE'] = 'roots.pem'    
     bisect_args = add_default_args(bisect_args)
     sys.argv = bisect_args + chrome_args
     print(f'running bisect-builds.py with options: {" ".join(sys.argv[1:])}')
