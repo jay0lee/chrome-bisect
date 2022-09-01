@@ -9,7 +9,10 @@ import requests
 import bisect_builds
 
 override_milestones = {
-        'M88': '843830'
+        'M88': '843830',
+        'M99': '961656',
+        'M100': '972766',
+        'M102': '992738',
         }
 
 def get_relative_chrome_versions(minus=0):
