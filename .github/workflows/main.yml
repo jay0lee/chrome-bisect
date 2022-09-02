@@ -21,7 +21,6 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 1
       matrix:
         include:
           - os: ubuntu-22.04
@@ -367,24 +366,25 @@ jobs:
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
-        if: matrix.arch != 'Win32' # Mac/Linux upload
         with:
           name: chrome-bisect-${{ matrix.os }}-${{ matrix.arch }}
           path: |
             chrome-bisect-*.zip
 
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+
       - name: Download artifacts
-        if: matrix.arc == 'Win32'
         uses: actions/download-artifact@v3
         
       - name: Set datetime version string
-        if: matrix.arc == 'Win32'
         id: dateversion
         run: |
           echo "::set-output name=dateversion::$(date +'%Y%m%d.%k%M%S')"
 
       - uses: "marvinpinto/action-automatic-releases@latest"
-        if: matrix.arc == 'Win32'
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: ${{ steps.dateversion.outputs.dateversion }}
@@ -392,6 +392,6 @@ jobs:
           draft: false
           title: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
           files: |
-            chrome-bisect-windows*
+            chrome-bisect-windows*/*
             chrome-bisect-macos-latest/*
             chrome-bisect-ubuntu-18.04/*
