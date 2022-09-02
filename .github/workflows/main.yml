@@ -365,7 +365,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: matrix.arch != 'Win32' # Mac/Linux upload
         with:
-          name: chrome-bisect-${{ matrix.os }}-${{ matrhix.arch}}
+          name: chrome-bisect-${{ matrix.os }}-${{ matrix.arch }}
           path: |
             chrome-bisect-*.zip
 
