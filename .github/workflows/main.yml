@@ -269,7 +269,7 @@ jobs:
         run: |
           cd "${env:PYTHON_SOURCE_PATH}"
           # We need out custom openssl.props which uses OpenSSL 3 DLL names
-          Copy-Item -Path "${env:GITHUB_WORKSPACE}\src\tools\openssl.props" -Destination PCBuild\
+          Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\
           echo "Building for ${env:PYBUILDRELEASE_ARCH}..."
           PCBuild\build.bat -m --pgo -c Release -p "${env:PYBUILDRELEASE_ARCH}"
 
@@ -353,7 +353,7 @@ jobs:
           "${PYTHON}" -m PyInstaller -F --distpath $distpath $pyi_args chrome_bisect.py
           cp roots.pem $distpath
           $distpath/chrome_bisect --help
-          export archivefile="chrome-bisect-${osname}.zip"
+          export archivefile="chrome-bisect-${osname}-${arch}.zip"
           echo "archive file will be ${archivefile} when zipped."
           if [ "${osname}" == 'windows' ]; then
             /c/Program\ Files/7-Zip/7z.exe a -tzip $archivefile $distpath
@@ -363,24 +363,24 @@ jobs:
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
-        if: matrix.os != 'windows-2022' # Mac/Linux upload
+        if: matrix.arch != 'Win32' # Mac/Linux upload
         with:
-          name: chrome-bisect-${{ matrix.os }}
+          name: chrome-bisect-${{ matrix.os }}-${{ matrhix.arch}}
           path: |
             chrome-bisect-*.zip
 
       - name: Download artifacts
-        if: matrix.os == 'windows-2022' # Windows download
+        if: matrix.arc == 'Win32'
         uses: actions/download-artifact@v3
         
       - name: Set datetime version string
-        if: matrix.os == 'windows-2022'
+        if: matrix.arc == 'Win32'
         id: dateversion
         run: |
           echo "::set-output name=dateversion::$(date +'%Y%m%d.%k%M%S')"
 
       - uses: "marvinpinto/action-automatic-releases@latest"
-        if: matrix.os == 'windows-2022'
+        if: matrix.arc == 'Win32'
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: ${{ steps.dateversion.outputs.dateversion }}
@@ -388,6 +388,6 @@ jobs:
           draft: false
           title: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
           files: |
-            chrome-bisect-windows.zip
+            chrome-bisect-windows*
             chrome-bisect-macos-latest/*
             chrome-bisect-ubuntu-18.04/*
