@@ -392,6 +392,4 @@ jobs:
           draft: false
           title: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
           files: |
-            chrome-bisect-windows*/*
-            chrome-bisect-macos-latest/*
-            chrome-bisect-ubuntu-18.04/*
+            chrome-bisect-*/*.zip
