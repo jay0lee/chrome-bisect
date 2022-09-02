@@ -39,7 +39,9 @@ chrome_bisect --good M85 --bad M90 -- https://www.google.com/`
  Let's pretend you own the site https://tls-v1-1.badssl.com/ and that you've noticed it stopped working with Chrome 90. From the site name or error returned by the page, you may already know why it stopped working but let's pretend you don't.
   1. Run Chrome Bisect:
 
-```chrome_bisect --good M85```
+```
+chrome_bisect --good M85 -- https://tls-v1-1.badssl.com/
+```
 
   2. The tool will start downloading Chromium builds. If the Chromium build launches and a red page with text from the website loads properly, exit the browser and mark the build as good. If you see a connection error and the browser fails to load the site, mark the build as bad.
   3. The tool will need to download and run about a dozen builds to narrow the build scope as tightly as possible. Keep marking builds as good or bad until the tool finishes.
