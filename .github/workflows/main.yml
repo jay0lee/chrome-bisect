@@ -61,7 +61,7 @@ jobs:
           tar xvvf bin.tar.xz
 
       - name: MacOS remove Homebrew
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS-NOPE'
         run: |
           # remove everything
           brew uninstall $(brew list)
