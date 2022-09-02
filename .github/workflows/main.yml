@@ -369,7 +369,7 @@ jobs:
           $PYTHON -m staticx -l "${ldlib}" "${distpath}/chrome_bisect" "${distpath}/chrome_bisect-staticx"
           ${distpath}/chrome_bisect-staticx --help
           rm -v ${distpath}/chrome_bisect
-          mv -v ${distpath}/chrome_bisect-static ${distpath}/chrome_bisect
+          mv -v ${distpath}/chrome_bisect-staticx ${distpath}/chrome_bisect
 
       - name: Package binaries
         run: |
