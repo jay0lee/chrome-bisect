@@ -104,7 +104,7 @@ jobs:
             MAKE=nmake
             MAKEOPT=""
             PERL="c:\strawberry\perl\bin\perl.exe"
-            echo "PYTHON=${PYTHON_INSTALL_PATH}\python.exe" >> $GITHUB_ENV
+            echo "PYTHON=${PYTHON_SOURCE_PATH}\PCbuild\${PYEXTERNALS_PATH}\python.exe" >> $GITHUB_ENV
             echo "GAM_ARCHIVE_ARCH=${GAM_ARCHIVE_ARCH}" >> $GITHUB_ENV
             echo "WIX_ARCH=${WIX_ARCH}" >> $GITHUB_ENV
           fi
@@ -277,18 +277,6 @@ jobs:
           Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\
           echo "Building for ${env:PYBUILDRELEASE_ARCH}..."
           PCBuild\build.bat -m --pgo -c Release -p "${env:PYBUILDRELEASE_ARCH}"
-
-      - name: Windows Install Python
-        if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          cd "${env:PYTHON_SOURCE_PATH}"
-          mkdir "${env:PYTHON_INSTALL_PATH}\lib"
-          mkdir "${env:PYTHON_INSTALL_PATH}\include"
-          Copy-Item -Path "PCBuild\${env:PYEXTERNALS_PATH}\*" "${env:PYTHON_INSTALL_PATH}\"
-          Copy-Item -Path "${env:PYTHON_SOURCE_PATH}\Lib\*" "${env:PYTHON_INSTALL_PATH}\lib\" -recurse
-          Copy-Item -Path "${env:PYTHON_SOURCE_PATH}\Include\*" "${env:PYTHON_INSTALL_PATH}\include\" -recurse
-          Copy-Item -Path "${env:PYTHON_SOURCE_PATH}\PC\*.h" "${env:PYTHON_INSTALL_PATH}\include\"
 
       - name: Mac/Linux Build Python
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
