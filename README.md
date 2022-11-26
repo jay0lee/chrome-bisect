@@ -53,7 +53,7 @@ chrome_bisect --good M102 --bad M103 -- http://batstat.appspot.com/
 
 # Known Limitations
 As mentioned above, Chrome Bisect has a few limitations that you should be aware of:
-* Chrome Bisect downloads public Chromium browser binaries to test with, these open-source public builds do not contain everythng the official Chrome browser contains and may not be good for testing issues related to:
+* Chrome Bisect downloads public Chromium browser binaries to test with, these open-source public builds do not contain everything the official Chrome browser contains and may not be good for testing issues related to:
      * The PDF Viewer
      * Adobe Flash Player
      * Widevine DRM
