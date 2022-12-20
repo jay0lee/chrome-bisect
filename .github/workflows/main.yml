@@ -326,7 +326,10 @@ jobs:
           "${PYTHON}" -m pip install --user -r requirements.txt
         
       - name: Download bisect script
-        run: curl -s --basic -n "https://chromium.googlesource.com/chromium/+/refs/heads/trunk/tools/bisect-builds.py?format=TEXT" | base64 -d > bisect_builds.py
+        run: |
+          curl -s --basic -n "https://chromium.googlesource.com/chromium/+/refs/heads/trunk/tools/bisect-builds.py?format=TEXT" | base64 -d > ./bisect_builds.py
+          file ./bisect_builds.py
+          "${PYTHON}" ./bisect_builds.py --help
 
       - name: Download Google CA bundle
         run: curl -o ./roots.pem https://pki.goog/roots.pem
