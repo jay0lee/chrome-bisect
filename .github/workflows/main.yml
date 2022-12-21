@@ -404,7 +404,7 @@ jobs:
       - name: Set datetime version string
         id: dateversion
         run: |
-          export dateversion=$(date  +'%Y%m%d.%k%M%S')"
+          export dateversion="$(date  +'%Y%m%d.%k%M%S')"
           echo "Date version: ${dateversion}"
           echo "dateversion=${dateversion}" >> $GITHUB_OUTPUT
 
