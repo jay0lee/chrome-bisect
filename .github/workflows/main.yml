@@ -404,7 +404,9 @@ jobs:
       - name: Set datetime version string
         id: dateversion
         run: |
-          echo "::set-output name=dateversion::$(date +'%Y%m%d.%k%M%S')"
+          export dateversion=$(date  +'%Y%m%d.%k%M%S')"
+          echo "Date version: ${dateversion}"
+          echo "dateversion=${dateversion}" >> $GITHUB_OUTPUT
 
       - name: VirusTotal Scan
         uses: crazy-max/ghaction-virustotal@v3
