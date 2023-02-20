@@ -328,7 +328,7 @@ jobs:
 
       - name: Install requirements
         run: |
-          "${PYTHON}" -m pip install --user -r requirements.txt
+          "${PYTHON}" -m pip install --user -r requirements.txt --no-binary=:all:
         
       - name: Download bisect script
         run: |
