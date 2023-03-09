@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-20.04
             jid: 1
             arch: x86_64
             openssl_archs: linux-x86_64
@@ -344,32 +344,32 @@ jobs:
           if [[ "${RUNNER_OS}" == "macOS" ]]; then
             pyi_args="--target-arch=universal2"
           fi
-          "${PYTHON}" -m PyInstaller -F --distpath $distpath $pyi_args chrome_bisect.py
+          "${PYTHON}" -m PyInstaller --onedir --distpath $distpath $pyi_args chrome_bisect.py
           cp roots.pem $distpath
           $distpath/chrome_bisect --help
 
-      - name: Linux install patchelf/staticx
-        if: runner.os == 'Linux'
-        run: |
-          "${PYTHON}" -m pip install --upgrade patchelf-wrapper
-          "${PYTHON}" -m pip install --upgrade staticx
+      #- name: Linux install patchelf/staticx
+      #  if: runner.os == 'Linux'
+      #  run: |
+      #    "${PYTHON}" -m pip install --upgrade patchelf-wrapper
+      #    "${PYTHON}" -m pip install --upgrade staticx
 
-      - name: Linux make StaticX
-        if: runner.os == 'Linux'
-        run: |
-          case $RUNNER_ARCH in
-            X64)
-              ldlib=/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
-              ;;
-            ARM64)
-              ldlib=/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
-              ;;
-          esac
-          echo "ldlib=${ldlib}"
-          $PYTHON -m staticx -l "${ldlib}" "${distpath}/chrome_bisect" "${distpath}/chrome_bisect-staticx"
-          ${distpath}/chrome_bisect-staticx --help
-          rm -v ${distpath}/chrome_bisect
-          mv -v ${distpath}/chrome_bisect-staticx ${distpath}/chrome_bisect
+      #- name: Linux make StaticX
+      #  if: runner.os == 'Linux'
+      #  run: |
+      #    case $RUNNER_ARCH in
+      #      X64)
+      #        ldlib=/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      #        ;;
+      #      ARM64)
+      #        ldlib=/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+      #        ;;
+      #    esac
+      #    echo "ldlib=${ldlib}"
+      #    $PYTHON -m staticx -l "${ldlib}" "${distpath}/chrome_bisect" "${distpath}/chrome_bisect-staticx"
+      #    ${distpath}/chrome_bisect-staticx --help
+      #    rm -v ${distpath}/chrome_bisect
+      #    mv -v ${distpath}/chrome_bisect-staticx ${distpath}/chrome_bisect
 
       - name: Package binaries
         run: |
@@ -378,7 +378,8 @@ jobs:
           if [ "${RUNNER_OS}" == 'Windows' ]; then
             /c/Program\ Files/7-Zip/7z.exe a -tzip $archivefile $distpath
           else
-            zip -r $archivefile $distpath
+            cd $distpath
+            zip -r $archivefile .
           fi
 
       - name: upload artifacts
