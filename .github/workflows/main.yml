@@ -345,8 +345,8 @@ jobs:
             pyi_args="--target-arch=universal2"
           fi
           "${PYTHON}" -m PyInstaller --onedir --distpath $distpath $pyi_args chrome_bisect.py
-          cp roots.pem $distpath
-          $distpath/chrome_bisect --help
+          cp roots.pem $distpath/chrome_bisect/
+          $distpath/chrome_bisect/chrome_bisect --help
 
       #- name: Linux install patchelf/staticx
       #  if: runner.os == 'Linux'
@@ -375,10 +375,10 @@ jobs:
         run: |
           export archivefile="chrome-bisect-${RUNNER_OS}-${arch}.zip"
           echo "archive file will be ${archivefile} when zipped."
+          cd "${distpath}"
           if [ "${RUNNER_OS}" == 'Windows' ]; then
-            /c/Program\ Files/7-Zip/7z.exe a -tzip $archivefile $distpath
+            /c/Program\ Files/7-Zip/7z.exe a -tzip $archivefile .
           else
-            cd $distpath
             zip -r $archivefile .
           fi
 
@@ -387,7 +387,7 @@ jobs:
         with:
           name: chrome-bisect-${{ matrix.os }}-${{ matrix.arch }}
           path: |
-            chrome-bisect-*.zip
+            chrome-bisect/chrome-bisect-*.zip
 
       - name: Tar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
