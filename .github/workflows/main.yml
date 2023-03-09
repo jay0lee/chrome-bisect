@@ -381,13 +381,14 @@ jobs:
           else
             zip -r $archivefile .
           fi
+          mv -v $archivefile "${GITHUB_WORKSPACE}"
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: chrome-bisect-${{ matrix.os }}-${{ matrix.arch }}
           path: |
-            chrome-bisect/chrome-bisect/chrome-bisect-*.zip
+            chrome-bisect-*.zip
 
       - name: Tar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
