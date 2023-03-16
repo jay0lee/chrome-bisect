@@ -49,7 +49,7 @@ chrome_bisect --good M102 --bad M103 -- http://batstat.appspot.com/
   5. Open the changelog page and look through the list.
       * Can you tell which exact change in the list caused the site to stop loading? (hint, search the list of changes for "battery")
       * Why was that change made?
-      * What might you need to do to fix your site? (hint, notice how https://batstat.appspot.com should work in current Chrome versions but http://batstat.appspot.com only works in Chrome 102 and earlier)
+      * What might you need to do to fix your site? (hint, notice how HTTPS://batstat.appspot.com works in current Chrome versions but HTTP://batstat.appspot.com only works in Chrome 102 and earlier)
   6. For reference, here's the full output of an example run:
 
 <details>
