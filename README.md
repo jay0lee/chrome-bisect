@@ -51,7 +51,12 @@ chrome_bisect --good M102 --bad M103 -- http://batstat.appspot.com/
       * Why was that change made?
       * What might you need to do to fix your site? (hint, notice how https://batstat.appspot.com should work in current Chrome versions but http://batstat.appspot.com only works in Chrome 102 and earlier)
   6. For reference, here's the full output of an example run:
-```
+
+<details>
+  <summary>
+    Expand for full command output
+  </summary>
+<code>
 $ ./chrome_bisect --good M102 --bad M103 -- http://batstat.appspot.com/
 running bisect-builds.py with options: --good 992738 --bad M103 --verify-range --use-local-cache --archive linux64 -- http://batstat.appspot.com/
 Scanning from 992738 to 1002911 (10173 revisions).
@@ -121,7 +126,9 @@ Revision 997757 is [(g)ood/(b)ad/(r)etry/(u)nknown/(s)tdout/(q)uit]: g
 You are probably looking for a change made after 997757 (known good), but no later than 997775 (first known bad).
 CHANGELOG URL:
   https://chromium.googlesource.com/chromium/src/+log/03e9c2b23047e8bc7cdbbd5843b52112817ed1d6..53d540703b72faa87436f51279043c094939418f
-```
+</code>
+</details>
+
 
 # Known Limitations
 As mentioned above, Chrome Bisect has a few limitations that you should be aware of:
