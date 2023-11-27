@@ -46,7 +46,7 @@ chrome_bisect --good M102 --bad M103 -- http://batstat.appspot.com/
   2. The tool will start downloading Chromium builds. If the Chromium build launches and a green "GOOD" page loads with battery information, exit Chromium and mark the version as "g" GOOD. If a red page loads with BAD and complains of an API error, exit Chromium and mark the version as "b" BAD.
   3. The tool will need to download and run about a dozen builds to narrow the build range as tightly as possible. Keep marking builds as good or bad based on the page it shows until the tool finishes. Be careful here, marking one build wrong will cause the whole bisect to fail and show invalid results.
   4. Once the tool is finished with builds, it will tell you the exact builds between good and bad behavior. It also gives you a link to the changes that were made to Chromium browser between the last good and first bad build.
-  5. Open the changelog page and look through the list.
+  5. Open the changelog page and look through the list. (hint: here's [the changelog](https://chromium.googlesource.com/chromium/src/+log/6532aeeb8d42d47a236daade0441c7116d71d434..390d9b92ad768451683d89df70e6edcf2b893493) you should get.)
       * Can you tell which exact change in the list caused the site to stop loading? (hint, search the list of changes for "battery")
       * Why was that change made?
       * What might you need to do to fix your site? (hint, notice how HTTPS://batstat.appspot.com works in current Chrome versions but HTTP://batstat.appspot.com only works in Chrome 102 and earlier)
