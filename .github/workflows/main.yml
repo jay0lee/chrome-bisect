@@ -36,10 +36,7 @@ jobs:
             jid: 3
             arch: Win64
             openssl_archs: VC-WIN64A
-          - os: windows-2022
-            jid: 4
-            arch: Win32
-            openssl_archs: VC-WIN32
+
     steps:
 
       - uses: actions/checkout@v3
