@@ -39,19 +39,19 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
           fetch-depth: 0
 
       - name: Cache multiple paths
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-python-ssl
         with:
           path: |
             bin.tar.xz
             src/cpython
-          key: cbisect-${{ matrix.jid }}-20240511
+          key: cbisect-${{ matrix.jid }}-20240812
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
