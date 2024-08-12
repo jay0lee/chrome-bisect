@@ -9,12 +9,6 @@ import requests
 
 import bisect_builds
 
-override_milestones = {
-        'M88': '843830',
-        'M99': '961656',
-        'M100': '972766',
-        'M102': '992738',
-        }
 
 def get_relative_chrome_versions(minus=0):
     ''' returns current Chrome stable milestone number minus value of minus'''
@@ -93,9 +87,6 @@ def add_default_args(args):
         good_milestone = f'M{good}'
         args.extend(['--good', good_milestone])
 
-    # fix milestones with bad build results
-    for i in range(0, len(args)):
-        args[i] = override_milestones.get(args[i].upper(), args[i])
     return args
 
 def main():
