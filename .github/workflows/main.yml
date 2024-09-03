@@ -381,7 +381,7 @@ jobs:
           mv -v $archivefile "${GITHUB_WORKSPACE}"
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: chrome-bisect-${{ matrix.os }}-${{ matrix.arch }}
           path: |
