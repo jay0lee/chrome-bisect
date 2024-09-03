@@ -398,7 +398,7 @@ jobs:
     steps:
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         
       - name: Set datetime version string
         id: dateversion
