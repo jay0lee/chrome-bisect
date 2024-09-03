@@ -51,7 +51,7 @@ jobs:
           path: |
             bin.tar.xz
             src/cpython
-          key: cbisect-${{ matrix.jid }}-20240812
+          key: cbisect-${{ matrix.jid }}-20240903
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
@@ -408,7 +408,7 @@ jobs:
           echo "dateversion=${dateversion}" >> $GITHUB_OUTPUT
 
       - name: VirusTotal Scan
-        uses: crazy-max/ghaction-virustotal@v3
+        uses: crazy-max/ghaction-virustotal@v4
         with:
           vt_api_key: ${{ secrets.VT_API_KEY }}
           files: |
