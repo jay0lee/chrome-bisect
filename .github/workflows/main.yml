@@ -75,7 +75,7 @@ jobs:
             PERL=perl
             echo "MacOS version info:"
             sw_vers -productVersion
-            MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
+            MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)
             echo "MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}" >> $GITHUB_ENV
             echo "PYTHON=${PYTHON_INSTALL_PATH}/bin/python3" >> $GITHUB_ENV
           elif [[ "${RUNNER_OS}" == "Linux" ]]; then
