@@ -67,9 +67,6 @@ jobs:
           arch: x64
 
       - name: Set Env Variables for build
-        env:
-          arch: ${{ matrix.arch }}
-          openssl_archs: ${{ matrix.openssl_archs }}
         run: |
           echo "We are running on ${RUNNER_OS}"
           if [[ "${RUNNER_OS}" == "macOS" ]]; then
@@ -208,8 +205,7 @@ jobs:
           cd "${env:PYTHON_SOURCE_PATH}"
           # We need out custom openssl.props which uses OpenSSL 3 DLL names
           Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\
-          echo "Building for ${env:PYBUILDRELEASE_ARCH}..."
-          PCBuild\build.bat -m --pgo -c Release -p "${env:PYBUILDRELEASE_ARCH}"
+          PCBuild\build.bat -m --pgo -c Release"
 
       - name: Mac/Linux Build Python
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -270,8 +266,9 @@ jobs:
 
       - name: Package binaries
         run: |
+          export arch=$(uname -m)
           export archivefile="chrome-bisect-${RUNNER_OS}-${arch}.zip"
-          echo "archive file will be ${archivefile} when zipped."
+          echo "archive file will be named ${archivefile}."
           cd "${distpath}"
           if [ "${RUNNER_OS}" == 'Windows' ]; then
             /c/Program\ Files/7-Zip/7z.exe a -tzip $archivefile .
@@ -283,7 +280,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: chrome-bisect-${{ matrix.os }}-${{ matrix.arch }}
+          name: chrome-bisect-${{ matrix.jid }}
           path: |
             chrome-bisect-*.zip
 
