@@ -22,6 +22,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-20.04
@@ -247,21 +248,12 @@ jobs:
           # remove pre-compiled bootloaders so we fail if bootloader compile fails
           rm -rvf PyInstaller/bootloader/*-*/*
           cd bootloader
-          case "${arch}" in
-            "Win32")
-              export PYINSTALLER_BUILD_ARGS="--target-arch=32bit"
-              ;;
-            "Win64")
-              export PYINSTALLER_BUILD_ARGS="--target-arch=64bit"
-              ;;
-          esac
-          echo "PyInstaller build arguments: ${PYINSTALLER_BUILD_ARGS}"
-          "${PYTHON}" ./waf all $PYINSTALLER_BUILD_ARGS
+          "${PYTHON}" ./waf all
           "${PYTHON}" -m pip install ..
 
       - name: Install requirements
         run: |
-          "${PYTHON}" -m pip install --user -r requirements.txt --no-binary=:all:
+          "${PYTHON}" -m pip install --user -r requirements.txt
         
       - name: Download bisect script
         run: |
@@ -274,35 +266,9 @@ jobs:
 
       - name: Compile bisect script
         run: |
-          if [[ "${RUNNER_OS}" == "macOS" ]]; then
-            pyi_args="--target-arch=universal2"
-          fi
-          "${PYTHON}" -m PyInstaller --onedir --distpath $distpath $pyi_args chrome_bisect.py
+          "${PYTHON}" -m PyInstaller --onedir --distpath $distpath chrome_bisect.py
           cp roots.pem $distpath/chrome_bisect/
           $distpath/chrome_bisect/chrome_bisect --help
-
-      #- name: Linux install patchelf/staticx
-      #  if: runner.os == 'Linux'
-      #  run: |
-      #    "${PYTHON}" -m pip install --upgrade patchelf-wrapper
-      #    "${PYTHON}" -m pip install --upgrade staticx
-
-      #- name: Linux make StaticX
-      #  if: runner.os == 'Linux'
-      #  run: |
-      #    case $RUNNER_ARCH in
-      #      X64)
-      #        ldlib=/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
-      #        ;;
-      #      ARM64)
-      #        ldlib=/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
-      #        ;;
-      #    esac
-      #    echo "ldlib=${ldlib}"
-      #    $PYTHON -m staticx -l "${ldlib}" "${distpath}/chrome_bisect" "${distpath}/chrome_bisect-staticx"
-      #    ${distpath}/chrome_bisect-staticx --help
-      #    rm -v ${distpath}/chrome_bisect
-      #    mv -v ${distpath}/chrome_bisect-staticx ${distpath}/chrome_bisect
 
       - name: Package binaries
         run: |
