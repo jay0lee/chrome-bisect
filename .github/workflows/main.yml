@@ -11,7 +11,7 @@ defaults:
     shell: bash
 
 env:
-  OPENSSL_CONFIG_OPTS: no-fips
+  OPENSSL_CONFIG_OPTS: no-fips --api=3.0.0
   OPENSSL_INSTALL_PATH: ${{ github.workspace }}/bin/ssl
   OPENSSL_SOURCE_PATH: ${{ github.workspace }}/src/openssl
   PYTHON_INSTALL_PATH: ${{ github.workspace }}/bin/python
@@ -26,16 +26,12 @@ jobs:
         include:
           - os: ubuntu-20.04
             jid: 1
-            arch: x86_64
-            openssl_archs: linux-x86_64
-          - os: macos-12
+          - os: macos-13
             jid: 2
-            arch: universal2
-            openssl_archs: darwin64-x86_64 darwin64-arm64
-          - os: windows-2022
+          - os: macos-14
             jid: 3
-            arch: Win64
-            openssl_archs: VC-WIN64A
+          - os: windows-2022
+            jid: 4
 
     steps:
 
@@ -51,7 +47,7 @@ jobs:
           path: |
             bin.tar.xz
             src/cpython
-          key: cbisect-${{ matrix.jid }}-20240903
+          key: cbisect-${{ matrix.jid }}-20241101
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
@@ -62,7 +58,7 @@ jobs:
         if: runner.os == 'macOS-NOPE'
         run: |
           # remove everything
-          brew uninstall $(brew list)
+          # brew uninstall $(brew list)
 
 
       - name: Windows Configure VCode
@@ -77,22 +73,13 @@ jobs:
           openssl_archs: ${{ matrix.openssl_archs }}
         run: |
           echo "We are running on ${RUNNER_OS}"
-          if [[ "${arch}" == "Win64" ]]; then
-            PYEXTERNALS_PATH="amd64"
-            PYBUILDRELEASE_ARCH="x64"
-            CHOC_OPS=""
-          elif [[ "${arch}" == "Win32" ]]; then
-            PYEXTERNALS_PATH="win32"
-            PYBUILDRELEASE_ARCH="Win32"
-            CHOC_OPS="--forcex86"
-          fi
           if [[ "${RUNNER_OS}" == "macOS" ]]; then
             MAKE=make
             MAKEOPT="-j$(sysctl -n hw.logicalcpu)"
             PERL=perl
-            echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+            MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
+            echo "MACOSX_DEPLOYMENT_TARGET=${MACOS_DEPLOYMENT_TARGET}" >> $GITHUB_ENV
             echo "PYTHON=${PYTHON_INSTALL_PATH}/bin/python3" >> $GITHUB_ENV
-            echo "PIP_ARGS=--no-binary=:all:" >> $GITHUB_ENV
           elif [[ "${RUNNER_OS}" == "Linux" ]]; then
             MAKE=make
             MAKEOPT="-j$(nproc)"
@@ -103,17 +90,12 @@ jobs:
             MAKEOPT=""
             PERL="c:\strawberry\perl\bin\perl.exe"
             echo "PYTHON=${PYTHON_SOURCE_PATH}/PCbuild/${PYEXTERNALS_PATH}/python.exe" >> $GITHUB_ENV
-            echo "GAM_ARCHIVE_ARCH=${GAM_ARCHIVE_ARCH}" >> $GITHUB_ENV
-            echo "WIX_ARCH=${WIX_ARCH}" >> $GITHUB_ENV
           fi
           echo "We'll run make with: ${MAKEOPT}"
-          echo "arch=${arch}" >> $GITHUB_ENV
           echo "MAKE=${MAKE}" >> $GITHUB_ENV
           echo "MAKEOPT=${MAKEOPT}" >> $GITHUB_ENV
           echo "PERL=${PERL}" >> $GITHUB_ENV
           echo "PYEXTERNALS_PATH=${PYEXTERNALS_PATH}" >> $GITHUB_ENV
-          echo "PYBUILDRELEASE_ARCH=${PYBUILDRELEASE_ARCH}" >> $GITHUB_ENV
-          echo "openssl_archs=${openssl_archs}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${OPENSSL_INSTALL_PATH}/lib:${PYTHON_INSTALL_PATH}/lib" >> $GITHUB_ENV
           #echo "PATH=${PATH}:${PYTHON_INSTALL_PATH}/scripts" >> $GITHUB_ENV
 
@@ -129,16 +111,6 @@ jobs:
           git checkout "${LATEST_STABLE_TAG}"
           export COMPILED_OPENSSL_VERSION=${LATEST_STABLE_TAG:8} # Trim the openssl- prefix
           echo "COMPILED_OPENSSL_VERSION=${COMPILED_OPENSSL_VERSION}" >> $GITHUB_ENV
-          if [[ "${RUNNER_OS}" == "macOS" ]]; then
-            for openssl_arch in $openssl_archs; do
-              ssldir="${OPENSSL_SOURCE_PATH}-${openssl_arch}"
-              mkdir -v "${ssldir}"
-              cp -vrf ${OPENSSL_SOURCE_PATH}/* "${ssldir}/"
-            done
-            rm -vrf "${OPENSSL_SOURCE_PATH}"
-          else
-            mv -v "${OPENSSL_SOURCE_PATH}" "${OPENSSL_SOURCE_PATH}-${openssl_archs}"
-          fi
 
       - name: Windows NASM Install
         uses: ilammy/setup-nasm@v1
@@ -147,12 +119,10 @@ jobs:
       - name: Config OpenSSL
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
-          for openssl_arch in $openssl_archs; do
-            cd "${GITHUB_WORKSPACE}/src/openssl-${openssl_arch}"
-            # --libdir=lib is needed so Python can find OpenSSL libraries
-            "${PERL}" ./Configure "${openssl_arch}" --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
-          done
-
+          cd "$OPENSSL_SOURCE_PATH"
+          # --libdir=lib is needed so Python can find OpenSSL libraries
+          "${PERL}" ./Configure --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
+          
       - name: Rename GNU link on Windows
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         shell: bash
@@ -161,43 +131,15 @@ jobs:
       - name: Make OpenSSL
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
-          for openssl_arch in $openssl_archs; do
-            cd "${GITHUB_WORKSPACE}/src/openssl-${openssl_arch}"
-            $MAKE "${MAKEOPT}"
-          done
-
+          cd "$OPENSSL_SOURCE_PATH"
+          $MAKE "$MAKEOPT"
+          
       - name: Install OpenSSL
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
-          if [[ "${RUNNER_OS}" == "macOS" ]]; then
-            for openssl_arch in $openssl_archs; do
-              cd "${GITHUB_WORKSPACE}/src/openssl-${openssl_arch}"
-              # install_sw saves us ages processing man pages :-)
-              $MAKE install_sw
-              mv "${OPENSSL_INSTALL_PATH}" "${GITHUB_WORKSPACE}/bin/ssl-${openssl_arch}"
-            done
-            mkdir -vp "${OPENSSL_INSTALL_PATH}/lib"
-            mkdir -vp "${OPENSSL_INSTALL_PATH}/bin"
-            for archlib in libcrypto.3.dylib libssl.3.dylib libcrypto.a libssl.a; do
-              lipo -create "${GITHUB_WORKSPACE}/bin/ssl-darwin64-x86_64/lib/${archlib}" \
-                           "${GITHUB_WORKSPACE}/bin/ssl-darwin64-arm64/lib/${archlib}" \
-                   -output "${GITHUB_WORKSPACE}/bin/ssl/lib/${archlib}"
-            done
-            mv ${GITHUB_WORKSPACE}/bin/ssl-darwin64-x86_64/include ${GITHUB_WORKSPACE}/bin/ssl/
-            lipo -create "${GITHUB_WORKSPACE}/bin/ssl-darwin64-x86_64/bin/openssl" \
-                         "${GITHUB_WORKSPACE}/bin/ssl-darwin64-arm64/bin/openssl" \
-                 -output "${GITHUB_WORKSPACE}/bin/ssl/bin/openssl"
-            rm -rf ${GITHUB_WORKSPACE}/bin/ssl-darwin64-x86_64
-            rm -rf ${GITHUB_WORKSPACE}/bin/ssl-darwin64-arm64
-            echo "LDFLAGS=-L${OPENSSL_INSTALL_PATH}/lib" >> $GITHUB_ENV
-            echo "CRYPTOGRAPHY_SUPPRESS_LINK_FLAGS=1" >> $GITHUB_ENV
-            echo "CFLAGS=-I${OPENSSL_INSTALL_PATH}/include -arch arm64 -arch x86_64" >> $GITHUB_ENV
-            echo "ARCHFLAGS=-arch x86_64 -arch arm64" >> $GITHUB_ENV
-          else
-            cd "${GITHUB_WORKSPACE}/src/openssl-${openssl_archs}"
-            # install_sw saves us ages processing man pages :-)
-            $MAKE install_sw
-          fi
+          cd "$OPENSSL_SOURCE_PATH"
+          # install_sw saves us ages processing man pages :-)
+          $MAKE install_sw
 
       - name: Run OpenSSL
         run: |
@@ -219,18 +161,12 @@ jobs:
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "${PYTHON_SOURCE_PATH}"
-          if [[ "${RUNNER_OS}" == "macOS" ]]; then
-            extra_args=( "--enable-universalsdk" "--with-universal-archs=universal2" )
-          else
-            extra_args=( )
-          fi
           ./configure --with-openssl="${OPENSSL_INSTALL_PATH}" \
                       --prefix="${PYTHON_INSTALL_PATH}" \
                       --enable-shared \
                       --with-ensurepip=upgrade \
                       --enable-optimizations \
-                      --with-lto \
-                      "${extra_args[@]}"
+                      --with-lto
 
       - name: Windows Get External Python deps
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
