@@ -35,7 +35,6 @@ jobs:
             jid: 4
 
     steps:
-
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -61,12 +60,11 @@ jobs:
           # remove everything
           # brew uninstall $(brew list)
 
-
       - name: Windows Configure VCode
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         with:
-          arch: ${{ matrix.arch }}
+          arch: x64
 
       - name: Set Env Variables for build
         env:
