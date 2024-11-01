@@ -203,7 +203,7 @@ jobs:
         shell: powershell
         run: |
           cd "${env:PYTHON_SOURCE_PATH}"
-          PCBuild\build.bat -m --pgo -c Release"
+          PCBuild\build.bat -m --pgo -c Release
 
       - name: Mac/Linux Build Python
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
