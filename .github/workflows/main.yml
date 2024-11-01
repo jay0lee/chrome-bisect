@@ -264,7 +264,7 @@ jobs:
 
       - name: Compile bisect script
         run: |
-          "${PYTHON}" -m PyInstaller --onedir --distpath $distpath chrome_bisect.py
+          "${PYTHON}" -m PyInstaller --onedir --clean --noconfirm --distpath $distpath chrome_bisect.py
           cp roots.pem $distpath/chrome_bisect/
           $distpath/chrome_bisect/chrome_bisect --help
 
@@ -296,7 +296,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-
       - name: Download artifacts
         uses: actions/download-artifact@v4.1.7
         
