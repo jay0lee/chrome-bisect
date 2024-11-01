@@ -73,8 +73,10 @@ jobs:
             MAKE=make
             MAKEOPT="-j$(sysctl -n hw.logicalcpu)"
             PERL=perl
+            echo "MacOS version info:"
+            sw_vers -productVersion
             MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | awk -F '.' '{print $1 "." $2}')
-            echo "MACOSX_DEPLOYMENT_TARGET=${MACOS_DEPLOYMENT_TARGET}" >> $GITHUB_ENV
+            echo "MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}" >> $GITHUB_ENV
             echo "PYTHON=${PYTHON_INSTALL_PATH}/bin/python3" >> $GITHUB_ENV
           elif [[ "${RUNNER_OS}" == "Linux" ]]; then
             MAKE=make
