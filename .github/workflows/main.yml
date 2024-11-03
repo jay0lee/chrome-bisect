@@ -190,9 +190,6 @@ jobs:
           cp -v "$env:OPENSSL_INSTALL_PATH\bin\*" "${env:OPENSSL_EXT_TARGET_PATH}"
           cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\*" "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
           cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\applink.c" "${env:OPENSSL_EXT_TARGET_PATH}\include\"
-          # Python expects files to not have -x64 in the name
-          Get-ChildItem "${env:OPENSSL_EXT_TARGET_PATH}" -Recurse | Where {$_.Name -Match '-x64'} | Rename-Item -NewName {$_.name -replace '-x64','' } 
-          
 
       - name: Windows Install sphinx-build
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -207,6 +204,8 @@ jobs:
         shell: powershell
         run: |
           cd "${env:PYTHON_SOURCE_PATH}"
+          # We need out custom openssl.props which uses OpenSSL 3 DLL names
+          Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\
           PCBuild\build.bat -m --pgo -c Release
 
       - name: Mac/Linux Build Python
