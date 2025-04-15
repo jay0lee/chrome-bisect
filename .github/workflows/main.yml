@@ -33,6 +33,10 @@ jobs:
             jid: 3
           - os: windows-2022
             jid: 4
+            arch: x64
+          - os: windows-11-arm64
+            jid: 5
+            arch: arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +68,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         with:
-          arch: x64
+          arch: ${{ matrix.arch }}
 
       - name: Set Env Variables for build
         run: |
