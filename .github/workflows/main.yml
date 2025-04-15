@@ -3,6 +3,7 @@ name: Build Chrome Bisect Script
 on:
   push:
   pull_request:
+  workflow_dispatch:
   schedule:
     - cron: '30 20 * * 6'
 
