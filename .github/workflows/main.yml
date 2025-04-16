@@ -123,8 +123,9 @@ jobs:
         if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "$OPENSSL_SOURCE_PATH"
-          export CFLAGS=-DNO_INTERLOCKEDOR64
-          echo "CFLAGS=${CFLAGS}"  >> $GITHUB_ENV
+          if ([ "$RUNNER_OS" == "Windows" ] && [ "$RUNNER_ARCH" == "ARM64" ]); then
+            export CFLAGS=-DNO_INTERLOCKEDOR64
+          fi
           # --libdir=lib is needed so Python can find OpenSSL libraries
           "${PERL}" ./Configure --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
           
@@ -137,6 +138,9 @@ jobs:
         if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "$OPENSSL_SOURCE_PATH"
+          if ([ "$RUNNER_OS" == "Windows" ] && [ "$RUNNER_ARCH" == "ARM64" ]); then
+            export CFLAGS=-DNO_INTERLOCKEDOR64
+          fi
           $MAKE $MAKEOPT
           
       - name: Install OpenSSL
