@@ -67,7 +67,7 @@ jobs:
       - name: Set Env Variables for build
         run: |
           echo "We are running on ${RUNNER_OS}"
-          if [[ "${RUNNER_OS}" == "macOS" ]]; then
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
             MAKE=make
             MAKEOPT="-j$(sysctl -n hw.logicalcpu)"
             PERL=perl
@@ -76,16 +76,21 @@ jobs:
             MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)
             echo "MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}" >> $GITHUB_ENV
             echo "PYTHON=${PYTHON_INSTALL_PATH}/bin/python3" >> $GITHUB_ENV
-          elif [[ "${RUNNER_OS}" == "Linux" ]]; then
+          elif [[ "$RUNNER_OS" == "Linux" ]]; then
             MAKE=make
             MAKEOPT="-j$(nproc)"
             PERL=perl
             echo "PYTHON=${PYTHON_INSTALL_PATH}/bin/python3" >> $GITHUB_ENV
-          elif [[ "${RUNNER_OS}" == "Windows" ]]; then
+          elif [[ "$RUNNER_OS" == "Windows" ]]; then
             MAKE=nmake
             MAKEOPT=""
             PERL="c:\strawberry\perl\bin\perl.exe"
-            echo "PYTHON=${PYTHON_SOURCE_PATH}/PCbuild/amd64/python.exe" >> $GITHUB_ENV
+            if [[ "$RUNNER_ARCH" == "X64" ]]; then
+              export arch_path="amd64"
+            elif [[ "$RUNNER_ARCH" == "ARM64" ]]; then
+              export arch_path="arm64"
+            fi
+            echo "PYTHON=${PYTHON_SOURCE_PATH}/PCbuild/${arch_path}/python.exe" >> $GITHUB_ENV
           fi
           echo "We'll run make with: ${MAKEOPT}"
           echo "MAKE=${MAKE}" >> $GITHUB_ENV
@@ -211,7 +216,13 @@ jobs:
         shell: powershell
         run: |
           cd "${env:PYTHON_SOURCE_PATH}"
-          PCBuild\build.bat -m --pgo -c Release -p "$RUNNER_ARCH"
+          if [[ "$RUNNER_ARCH" == "X64" ]]; then
+            export arch="x64"
+          elif [[ "$RUNNER_ARCH" == "ARM64" ]]; then
+            export arch="ARM64"
+          fi
+          echo "Using arch ${arch}..."
+          PCBuild\build.bat -m --pgo -c Release -p "$arch"
 
       - name: Mac/Linux Build Python
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
