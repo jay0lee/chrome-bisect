@@ -33,6 +33,7 @@ def detect_archive():
     sixty_four = sys.maxsize > 2**32
     mymachine = machine()
     archive = None
+    print(f'OS: {myos}, 64-bit: {sixty_four}, machine: {mymachine}')
     if myos == 'Windows':
         if sixty_four:
             archive = 'win64'
@@ -57,6 +58,9 @@ def detect_archive():
 
 def add_default_args(args):
     '''sets appropriate default arguments for bisect-builds.py'''
+    
+    detected_archive = detect_archive()
+
     # return --help quick
     if '--help' in args or '-h' in args:
         return args
@@ -73,8 +77,7 @@ def add_default_args(args):
         if arg in ['-a', '--archive']:
             archive_set = True
     if not archive_set:
-        archive = detect_archive()
-        args.extend(['--archive', archive])
+        args.extend(['--archive', detected_archive])
 
     # if --good is not set set to Chrome stable milestone - 6
     good_set = False
