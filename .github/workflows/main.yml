@@ -123,7 +123,7 @@ jobs:
         if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "$OPENSSL_SOURCE_PATH"
-          if ([ "$RUNNER_OS" == "Windows" && "$RUNNER_ARCH" == "ARM64" ]); then
+          if ([ "$RUNNER_OS" == "Windows" ] && [ "$RUNNER_ARCH" == "ARM64" ]); then
             export ossl_arch="VC-CLANG-WIN64-CLANGASM-ARM"
           fi
           # --libdir=lib is needed so Python can find OpenSSL libraries
