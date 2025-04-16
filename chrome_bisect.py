@@ -8,7 +8,9 @@ import sys
 import requests
 
 import bisect_builds
-
+from version import version as __version__
+__author__ "Jay Lee <jay0lee@gmail.com>"
+__name__ = "Chrome Bisect"
 
 def get_relative_chrome_versions(minus=0):
     ''' returns current Chrome stable milestone number minus value of minus'''
@@ -55,6 +57,11 @@ def add_default_args(args):
     '''sets appropriate default arguments for bisect-builds.py'''
     
     detected_archive = detect_archive()
+
+    if '--version' in args:
+        print(f'{__name__} {__version__}')
+        print(f'Author: {__author__}')
+        sys.exit(0)
 
     # return --help quick
     if '--help' in args or '-h' in args:
