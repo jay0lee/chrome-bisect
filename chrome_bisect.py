@@ -30,28 +30,23 @@ def get_relative_chrome_versions(minus=0):
 def detect_archive():
     '''returns an appropriate value for archive based on current OS and architecture.'''
     myos = system()
-    sixty_four = sys.maxsize > 2**32
     mymachine = machine()
-    archive = None
-    print(f'OS: {myos}, 64-bit: {sixty_four}, machine: {mymachine}')
-    if myos == 'Windows':
-        if sixty_four:
-            archive = 'win64'
-        else:
-            archive = 'win'
-    elif myos == 'Linux':
-        if sixty_four:
-            archive = 'linux64'
-        else:
-            archive = 'linux'
-    elif myos == 'Darwin':
-        if mymachine == 'arm64':
-            archive = 'mac-arm'
-        elif mymachine == 'x86_64':
-            archive = 'mac64'
-    if not archive:
-        print('Could not auto-detect value for --archive. ' \
-              f'OS: {myos}, 64-bit: {sixty_four}, machine: {mymachine}')
+    print(f'OS: {myos}, machine: {mymachine}')
+    match myos, mymachine:
+      case 'Windows', 'ARM64':
+        archive = 'win-arm64'
+      case 'Windows', 'AMD64':
+        archive = 'win64'
+      case 'Linux', 'x86_64':
+        archive = 'linux-64'
+      case 'Linux', 'aarch64':
+        archive = 'linux-arm'
+      case 'Darwin', 'arm64':
+        archive = 'mac-arm'
+      case 'Darwin', 'x86_64':
+        archive = 'mac64'
+      case _:
+        print('Could not auto-detect value for --archive. ')
         sys.exit(1)
     return archive
 
