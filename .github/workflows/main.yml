@@ -145,6 +145,7 @@ jobs:
       - name: Get latest stable Python source
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
+          mkdir -vp "${GITHUB_WORKSPACE}/src"
           cd "${GITHUB_WORKSPACE}/src"
           git clone https://github.com/python/cpython.git
           cd "${PYTHON_SOURCE_PATH}"
