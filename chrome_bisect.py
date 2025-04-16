@@ -9,7 +9,7 @@ import requests
 
 import bisect_builds
 from version import version as __version__
-__author__ "Jay Lee <jay0lee@gmail.com>"
+__author__ = "Jay Lee <jay0lee@gmail.com>"
 __name__ = "Chrome Bisect"
 
 def get_relative_chrome_versions(minus=0):
