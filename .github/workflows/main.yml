@@ -18,7 +18,7 @@ env:
   PYTHON_INSTALL_PATH: ${{ github.workspace }}/bin/python
   PYTHON_SOURCE_PATH: ${{ github.workspace }}/src/cpython
   distpath: ${{ github.workspace }}/chrome_bisect
-  build_ssl: false
+  build_ssl: true
 
 jobs:
   build:
