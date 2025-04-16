@@ -71,6 +71,7 @@ jobs:
           echo "We are running on ${RUNNER_OS}"
           echo "Existing Python Info:"
           python3 -c "import platform; print(platform.machine())"
+          which python3
           mkdir -p bin
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             MAKE=make
@@ -231,6 +232,9 @@ jobs:
             $env:arch = "x64"
           } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
             $env:arch =  "ARM64"
+            # build arm64 version without PGO first
+            PCBuild\build.bat -c Release -p $env:arch
+            export PYTHON_FOR_BUILD="$PYTHON"
           }
           Write-Output "Using arch $($env:arch)..."
           PCBuild\build.bat -c Release -p $env:arch --pgo
@@ -251,8 +255,8 @@ jobs:
 
       - name: Run Python
         run: |
-          "${PYTHON}" -V
-          "${PYTHON}" -c "import ssl; print(f'Using {ssl.OPENSSL_VERSION}')"
+          "$PYTHON" -V
+          "$PYTHON" -c "import ssl; print(f'Using {ssl.OPENSSL_VERSION}')"
 
       - name: Upgrade pip, wheel, etc
         run: |
