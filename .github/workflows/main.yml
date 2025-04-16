@@ -169,29 +169,29 @@ jobs:
           cd "${env:PYTHON_SOURCE_PATH}"
           PCBuild\get_externals.bat
 
-   #   - name: Windows overwrite external OpenSSL with local
-   #     if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-   #     shell: powershell
-   #     run: |
-   #       cd "${env:PYTHON_SOURCE_PATH}"
-   #       $env:OPENSSL_EXT_PATH = "$(Get-Item externals\openssl-bin-* | Select -exp FullName)\"
-   #       echo "External OpenSSL was downloaded to ${env:OPENSSL_EXT_PATH}"
-   #       Remove-Item -recurse -force "${env:OPENSSL_EXT_PATH}*"
-   #       # Emulate what this script does:
-   #       # https://github.com/python/cpython/blob/main/PCbuild/openssl.vcxproj
-   #       if (${env:RUNNER_ARCH} -eq "X64") {
-   #         $env:ossl_path = "amd64"
-   #       } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
-   #         $env:ossl_path =  "arm64"
-   #       }
-   #       $env:OPENSSL_EXT_TARGET_PATH = "${env:OPENSSL_EXT_PATH}${env:ossl_path}"
-   #       echo "Copying our OpenSSL to ${env:OPENSSL_EXT_TARGET_PATH}"
-   #       mkdir "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
-   #       Copy-Item -Path "${env:OPENSSL_SOURCE_PATH}\LICENSE.txt" -Destination "${env:OPENSSL_EXT_TARGET_PATH}\LICENSE"
-   #       cp -v "$env:OPENSSL_INSTALL_PATH\lib\*" "${env:OPENSSL_EXT_TARGET_PATH}"
-   #       cp -v "$env:OPENSSL_INSTALL_PATH\bin\*" "${env:OPENSSL_EXT_TARGET_PATH}"
-   #       cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\*" "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
-   #       cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\applink.c" "${env:OPENSSL_EXT_TARGET_PATH}\include\"
+      - name: Windows overwrite external OpenSSL with local
+        if: runner.os == 'Windows-NOOOPE' && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          cd "${env:PYTHON_SOURCE_PATH}"
+          $env:OPENSSL_EXT_PATH = "$(Get-Item externals\openssl-bin-* | Select -exp FullName)\"
+          echo "External OpenSSL was downloaded to ${env:OPENSSL_EXT_PATH}"
+          Remove-Item -recurse -force "${env:OPENSSL_EXT_PATH}*"
+          # Emulate what this script does:
+          # https://github.com/python/cpython/blob/main/PCbuild/openssl.vcxproj
+          if (${env:RUNNER_ARCH} -eq "X64") {
+            $env:ossl_path = "amd64"
+          } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
+            $env:ossl_path =  "arm64"
+          }
+          $env:OPENSSL_EXT_TARGET_PATH = "${env:OPENSSL_EXT_PATH}${env:ossl_path}"
+          echo "Copying our OpenSSL to ${env:OPENSSL_EXT_TARGET_PATH}"
+          mkdir "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
+          Copy-Item -Path "${env:OPENSSL_SOURCE_PATH}\LICENSE.txt" -Destination "${env:OPENSSL_EXT_TARGET_PATH}\LICENSE"
+          cp -v "$env:OPENSSL_INSTALL_PATH\lib\*" "${env:OPENSSL_EXT_TARGET_PATH}"
+          cp -v "$env:OPENSSL_INSTALL_PATH\bin\*" "${env:OPENSSL_EXT_TARGET_PATH}"
+          cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\*" "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
+          cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\applink.c" "${env:OPENSSL_EXT_TARGET_PATH}\include\"
 
       - name: Windows Install sphinx-build
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
