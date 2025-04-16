@@ -93,29 +93,29 @@ jobs:
           echo "LD_LIBRARY_PATH=${OPENSSL_INSTALL_PATH}/lib:${PYTHON_INSTALL_PATH}/lib" >> $GITHUB_ENV
           #echo "PATH=${PATH}:${PYTHON_INSTALL_PATH}/scripts" >> $GITHUB_ENV
 
-      - name: Get latest stable OpenSSL source
-        if: steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          mkdir -vp "${GITHUB_WORKSPACE}/src"
-          cd "${GITHUB_WORKSPACE}/src"
-          git clone https://github.com/openssl/openssl.git
-          cd "${OPENSSL_SOURCE_PATH}"
-          export LATEST_STABLE_TAG=$(git tag --list openssl-* | grep -v alpha | grep -v beta | sort -Vr | head -n1)
-          echo "Checking out version ${LATEST_STABLE_TAG}"
-          git checkout "${LATEST_STABLE_TAG}"
-          export COMPILED_OPENSSL_VERSION=${LATEST_STABLE_TAG:8} # Trim the openssl- prefix
-          echo "COMPILED_OPENSSL_VERSION=${COMPILED_OPENSSL_VERSION}" >> $GITHUB_ENV
+  #    - name: Get latest stable OpenSSL source
+  #      if: steps.cache-python-ssl.outputs.cache-hit != 'true'
+  #      run: |
+  #        mkdir -vp "${GITHUB_WORKSPACE}/src"
+  #        cd "${GITHUB_WORKSPACE}/src"
+  #        git clone https://github.com/openssl/openssl.git
+  #        cd "${OPENSSL_SOURCE_PATH}"
+  #        export LATEST_STABLE_TAG=$(git tag --list openssl-* | grep -v alpha | grep -v beta | sort -Vr | head -n1)
+  #        echo "Checking out version ${LATEST_STABLE_TAG}"
+  #        git checkout "${LATEST_STABLE_TAG}"
+  #        export COMPILED_OPENSSL_VERSION=${LATEST_STABLE_TAG:8} # Trim the openssl- prefix
+  #        echo "COMPILED_OPENSSL_VERSION=${COMPILED_OPENSSL_VERSION}" >> $GITHUB_ENV
 
       - name: Windows NASM Install
         uses: ilammy/setup-nasm@v1
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
 
-      - name: Config OpenSSL
-        if: steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          cd "$OPENSSL_SOURCE_PATH"
-          # --libdir=lib is needed so Python can find OpenSSL libraries
-          "${PERL}" ./Configure --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
+  #    - name: Config OpenSSL
+  #      if: steps.cache-python-ssl.outputs.cache-hit != 'true'
+  #      run: |
+  #        cd "$OPENSSL_SOURCE_PATH"
+  #        # --libdir=lib is needed so Python can find OpenSSL libraries
+  #        "${PERL}" ./Configure --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
           
       - name: Rename GNU link on Windows
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -169,29 +169,29 @@ jobs:
           cd "${env:PYTHON_SOURCE_PATH}"
           PCBuild\get_externals.bat
 
-      - name: Windows overwrite external OpenSSL with local
-        if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          cd "${env:PYTHON_SOURCE_PATH}"
-          $env:OPENSSL_EXT_PATH = "$(Get-Item externals\openssl-bin-* | Select -exp FullName)\"
-          echo "External OpenSSL was downloaded to ${env:OPENSSL_EXT_PATH}"
-          Remove-Item -recurse -force "${env:OPENSSL_EXT_PATH}*"
-          # Emulate what this script does:
-          # https://github.com/python/cpython/blob/main/PCbuild/openssl.vcxproj
-          if (${env:RUNNER_ARCH} -eq "X64") {
-            $env:ossl_path = "amd64"
-          } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
-            $env:ossl_path =  "arm64"
-          }
-          $env:OPENSSL_EXT_TARGET_PATH = "${env:OPENSSL_EXT_PATH}${env:ossl_path}"
-          echo "Copying our OpenSSL to ${env:OPENSSL_EXT_TARGET_PATH}"
-          mkdir "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
-          Copy-Item -Path "${env:OPENSSL_SOURCE_PATH}\LICENSE.txt" -Destination "${env:OPENSSL_EXT_TARGET_PATH}\LICENSE"
-          cp -v "$env:OPENSSL_INSTALL_PATH\lib\*" "${env:OPENSSL_EXT_TARGET_PATH}"
-          cp -v "$env:OPENSSL_INSTALL_PATH\bin\*" "${env:OPENSSL_EXT_TARGET_PATH}"
-          cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\*" "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
-          cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\applink.c" "${env:OPENSSL_EXT_TARGET_PATH}\include\"
+   #   - name: Windows overwrite external OpenSSL with local
+   #     if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
+   #     shell: powershell
+   #     run: |
+   #       cd "${env:PYTHON_SOURCE_PATH}"
+   #       $env:OPENSSL_EXT_PATH = "$(Get-Item externals\openssl-bin-* | Select -exp FullName)\"
+   #       echo "External OpenSSL was downloaded to ${env:OPENSSL_EXT_PATH}"
+   #       Remove-Item -recurse -force "${env:OPENSSL_EXT_PATH}*"
+   #       # Emulate what this script does:
+   #       # https://github.com/python/cpython/blob/main/PCbuild/openssl.vcxproj
+   #       if (${env:RUNNER_ARCH} -eq "X64") {
+   #         $env:ossl_path = "amd64"
+   #       } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
+   #         $env:ossl_path =  "arm64"
+   #       }
+   #       $env:OPENSSL_EXT_TARGET_PATH = "${env:OPENSSL_EXT_PATH}${env:ossl_path}"
+   #       echo "Copying our OpenSSL to ${env:OPENSSL_EXT_TARGET_PATH}"
+   #       mkdir "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
+   #       Copy-Item -Path "${env:OPENSSL_SOURCE_PATH}\LICENSE.txt" -Destination "${env:OPENSSL_EXT_TARGET_PATH}\LICENSE"
+   #       cp -v "$env:OPENSSL_INSTALL_PATH\lib\*" "${env:OPENSSL_EXT_TARGET_PATH}"
+   #       cp -v "$env:OPENSSL_INSTALL_PATH\bin\*" "${env:OPENSSL_EXT_TARGET_PATH}"
+   #       cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\*" "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
+   #       cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\applink.c" "${env:OPENSSL_EXT_TARGET_PATH}\include\"
 
       - name: Windows Install sphinx-build
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -207,8 +207,8 @@ jobs:
         run: |
           cd "${env:PYTHON_SOURCE_PATH}"
           # We need out custom openssl.props which uses OpenSSL 3 DLL names
-          Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\
-          PCBuild\build.bat -m --pgo -c Release
+    #      Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\
+          PCBuild\build.bat -m --pgo -c Release -p "$RUNNER_ARCH"
 
       - name: Mac/Linux Build Python
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
