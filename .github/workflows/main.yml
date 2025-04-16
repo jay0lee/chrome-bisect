@@ -27,16 +27,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             jid: 1
-          - os: macos-13
+          - os: ubuntu-22.04-arm
             jid: 2
-          - os: macos-14
+          - os: macos-13
             jid: 3
-          - os: windows-2022
+          - os: macos-14
             jid: 4
-          - os: windows-11-arm
+          - os: windows-2025
             jid: 5
+          - os: windows-11-arm
+            jid: 6
 
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +53,7 @@ jobs:
           path: |
             bin.tar.xz
             src/cpython
-          key: cbisect-${{ matrix.jid }}-20241106
+          key: cbisect-${{ matrix.jid }}-20250416
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
