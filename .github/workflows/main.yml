@@ -291,6 +291,9 @@ jobs:
         run: |
           "${PYTHON}" -m PyInstaller --onedir --clean --noconfirm --distpath $distpath chrome_bisect.py
           cp roots.pem $distpath/chrome_bisect/
+
+      - name: Run bisect executable
+        run: |
           $distpath/chrome_bisect/chrome_bisect --help
           $distpath/chrome_bisect/chrome_bisect --version
 
