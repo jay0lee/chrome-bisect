@@ -123,8 +123,11 @@ jobs:
         if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "$OPENSSL_SOURCE_PATH"
+          if ([ "$RUNNER_OS" == "Windows" && "$RUNNER_ARCH" == "ARM64" ]); then
+            export ossl_arch="VC-CLANG-WIN64-CLANGASM-ARM"
+          fi
           # --libdir=lib is needed so Python can find OpenSSL libraries
-          "${PERL}" ./Configure --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
+          "${PERL}" ./Configure $ossl_arch --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
           
       - name: Rename GNU link on Windows
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
