@@ -69,6 +69,8 @@ jobs:
       - name: Set Env Variables for build
         run: |
           echo "We are running on ${RUNNER_OS}"
+          echo "Existing Python Info:"
+          python3 -c "import platform; print(platform.machine())"
           mkdir -p bin
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             MAKE=make
