@@ -134,7 +134,7 @@ jobs:
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "$OPENSSL_SOURCE_PATH"
-          $MAKE "$MAKEOPT"
+          $MAKE $MAKEOPT
           
       - name: Install OpenSSL
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
