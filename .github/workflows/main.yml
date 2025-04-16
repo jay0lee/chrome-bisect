@@ -142,7 +142,7 @@ jobs:
             export CFLAGS=-DNO_INTERLOCKEDOR64
           fi
           $MAKE $MAKEOPT
-          
+
       - name: Install OpenSSL
         if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
