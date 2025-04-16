@@ -221,8 +221,8 @@ jobs:
           } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
             $env:arch =  "ARM64"
           }
-          Write-Output "Using arch {0}..." -f $env:arch
-          PCBuild\build.bat -m --pgo -c Release -p $env:arch
+          Write-Output "Using arch $($env:arch)..."
+          PCBuild\build.bat -c Release -p $env:arch
 
       - name: Mac/Linux Build Python
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
