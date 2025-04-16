@@ -35,7 +35,7 @@ jobs:
           - os: windows-2022
             jid: 4
             arch: x64
-          - os: windows-11-arm64
+          - os: windows-11-arm
             jid: 5
             arch: arm64
 
