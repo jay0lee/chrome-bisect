@@ -122,23 +122,23 @@ jobs:
         shell: bash
         run: mv /usr/bin/link /usr/bin/gnulink
 
-      - name: Make OpenSSL
-        if: steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          cd "$OPENSSL_SOURCE_PATH"
-          $MAKE $MAKEOPT
+    #  - name: Make OpenSSL
+    #    if: steps.cache-python-ssl.outputs.cache-hit != 'true'
+    #    run: |
+    #      cd "$OPENSSL_SOURCE_PATH"
+    #      $MAKE $MAKEOPT
           
-      - name: Install OpenSSL
-        if: steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          cd "$OPENSSL_SOURCE_PATH"
+    #  - name: Install OpenSSL
+    #    if: steps.cache-python-ssl.outputs.cache-hit != 'true'
+    #    run: |
+    #      cd "$OPENSSL_SOURCE_PATH"
           # install_sw saves us ages processing man pages :-)
-          $MAKE install_sw
+    #      $MAKE install_sw
 
-      - name: Run OpenSSL
-        run: |
-          "${OPENSSL_INSTALL_PATH}/bin/openssl" version
-          file "${OPENSSL_INSTALL_PATH}/bin/openssl"
+    #  - name: Run OpenSSL
+    #    run: |
+    #      "${OPENSSL_INSTALL_PATH}/bin/openssl" version
+    #      file "${OPENSSL_INSTALL_PATH}/bin/openssl"
 
       - name: Get latest stable Python source
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -176,6 +176,7 @@ jobs:
           cd "${env:PYTHON_SOURCE_PATH}"
           $env:OPENSSL_EXT_PATH = "$(Get-Item externals\openssl-bin-* | Select -exp FullName)\"
           echo "External OpenSSL was downloaded to ${env:OPENSSL_EXT_PATH}"
+          dir $env:OPENSSL_EXT_PATH
           Remove-Item -recurse -force "${env:OPENSSL_EXT_PATH}*"
           # Emulate what this script does:
           # https://github.com/python/cpython/blob/main/PCbuild/openssl.vcxproj
