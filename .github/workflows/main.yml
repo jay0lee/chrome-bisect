@@ -111,7 +111,7 @@ jobs:
           cd "${OPENSSL_SOURCE_PATH}"
           export LATEST_STABLE_TAG=$(git tag --list openssl-* | grep -v alpha | grep -v beta | sort -Vr | head -n1)
           echo "Checking out version ${LATEST_STABLE_TAG}"
-          git checkout "${LATEST_STABLE_TAG}"
+          #git checkout "${LATEST_STABLE_TAG}"
           export COMPILED_OPENSSL_VERSION=${LATEST_STABLE_TAG:8} # Trim the openssl- prefix
           echo "COMPILED_OPENSSL_VERSION=${COMPILED_OPENSSL_VERSION}" >> $GITHUB_ENV
 
@@ -123,11 +123,8 @@ jobs:
         if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "$OPENSSL_SOURCE_PATH"
-          if ([ "$RUNNER_OS" == "Windows" ] && [ "$RUNNER_ARCH" == "ARM64" ]); then
-            export ossl_arch="VC-CLANG-WIN64-CLANGASM-ARM"
-          fi
           # --libdir=lib is needed so Python can find OpenSSL libraries
-          "${PERL}" ./Configure $ossl_arch --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
+          "${PERL}" ./Configure --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
           
       - name: Rename GNU link on Windows
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -166,7 +163,7 @@ jobs:
           echo "COMPILED_PYTHON_VERSION=${COMPILED_PYTHON_VERSION}" >> $GITHUB_ENV
 
       - name: Mac/Linux Configure Python
-        if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        if: runner.os != 'Windows-NOOOPE' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "${PYTHON_SOURCE_PATH}"
           ./configure --with-openssl="${OPENSSL_INSTALL_PATH}" \
@@ -218,7 +215,7 @@ jobs:
           sphinx-build --version
 
       - name: Windows Config/Build Python
-        if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        if: runner.os == 'Windows-NOOOPE' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         shell: powershell
         run: |
           cd "${env:PYTHON_SOURCE_PATH}"
