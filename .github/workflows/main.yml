@@ -59,12 +59,6 @@ jobs:
         run: |
           tar xvvf bin.tar.xz
 
-      - name: MacOS remove Homebrew
-        if: runner.os == 'macOS-NOPE'
-        run: |
-          # remove everything
-          # brew uninstall $(brew list)
-
       - name: Windows Configure VCode
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
