@@ -95,7 +95,7 @@ jobs:
           #echo "PATH=${PATH}:${PYTHON_INSTALL_PATH}/scripts" >> $GITHUB_ENV
 
       - name: Get latest stable OpenSSL source
-        if: env.build_ssl && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           mkdir -vp "${GITHUB_WORKSPACE}/src"
           cd "${GITHUB_WORKSPACE}/src"
@@ -112,7 +112,7 @@ jobs:
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
 
       - name: Config OpenSSL
-        if: env.build_ssl && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "$OPENSSL_SOURCE_PATH"
           # --libdir=lib is needed so Python can find OpenSSL libraries
@@ -124,20 +124,20 @@ jobs:
         run: mv /usr/bin/link /usr/bin/gnulink
 
       - name: Make OpenSSL
-        if: env.build_ssl && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "$OPENSSL_SOURCE_PATH"
           $MAKE $MAKEOPT
           
       - name: Install OpenSSL
-        if: env.build_ssl && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "$OPENSSL_SOURCE_PATH"
           # install_sw saves us ages processing man pages :-)
           $MAKE install_sw
 
       - name: Run OpenSSL
-        if: env.build_ssl
+        if: env.build_ssl == 'true'
         run: |
           "${OPENSSL_INSTALL_PATH}/bin/openssl" version
           file "${OPENSSL_INSTALL_PATH}/bin/openssl"
@@ -172,7 +172,7 @@ jobs:
           PCBuild\get_externals.bat
 
       - name: Windows overwrite external OpenSSL with local
-        if: env.build_ssl && runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        if: env.build_ssl == 'true' && runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         shell: powershell
         run: |
           cd "${env:PYTHON_SOURCE_PATH}"
@@ -194,6 +194,8 @@ jobs:
           cp -v "$env:OPENSSL_INSTALL_PATH\bin\*" "${env:OPENSSL_EXT_TARGET_PATH}"
           cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\*" "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
           cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\applink.c" "${env:OPENSSL_EXT_TARGET_PATH}\include\"
+          # We need our custom openssl.props which uses OpenSSL 3 DLL names
+          cp "${GITHUB_WORKSPACE}/openssl.props" PCBuild/
 
       - name: Windows Install sphinx-build
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -208,8 +210,6 @@ jobs:
         shell: powershell
         run: |
           cd "${env:PYTHON_SOURCE_PATH}"
-          # We need out custom openssl.props which uses OpenSSL 3 DLL names
-          # Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\
           PCBuild\build.bat -m --pgo -c Release -p "$RUNNER_ARCH"
 
       - name: Mac/Linux Build Python
