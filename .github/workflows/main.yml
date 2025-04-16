@@ -235,11 +235,11 @@ jobs:
           cd "${env:PYTHON_SOURCE_PATH}"
           if (${env:RUNNER_ARCH} -eq "X64") {
             $env:arch = "x64"
+            PCBuild\build.bat -c Release -p $env:arch --pgo
           } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
             $env:arch =  "ARM64"
+            PCBuild\build.bat -c Release -p $env:arch
           }
-          Write-Output "Using arch $($env:arch)..."
-          PCBuild\build.bat -c Release -p $env:arch --pgo
 
       - name: Mac/Linux Build Python
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
