@@ -33,7 +33,6 @@ def detect_archive():
     '''returns an appropriate value for archive based on current OS and architecture.'''
     myos = system()
     mymachine = machine()
-    print(f'OS: {myos}, machine: {mymachine}')
     match myos, mymachine:
       case 'Windows', 'ARM64':
         archive = 'win-arm64'
@@ -48,7 +47,7 @@ def detect_archive():
       case 'Darwin', 'x86_64':
         archive = 'mac64'
       case _:
-        print('Could not auto-detect value for --archive. ')
+        print(f'ERROR: Could not auto-detect value for --archive for OS {myos} and machine {mymachine}. Try manually specifying --archive.')
         sys.exit(1)
     return archive
 
@@ -61,6 +60,7 @@ def add_default_args(args):
     if '--version' in args:
         print(f'{__appname__} {__version__}')
         print(f'Author: {__author__}')
+        print(f'Detected --archive: {detected_archive}')
         sys.exit(0)
 
     # return --help quick
