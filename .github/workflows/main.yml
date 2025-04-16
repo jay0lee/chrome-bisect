@@ -204,7 +204,7 @@ jobs:
           cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\*" "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
           cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\applink.c" "${env:OPENSSL_EXT_TARGET_PATH}\include\"
           # We need our custom openssl.props which uses OpenSSL 3 DLL names
-          cp "${GITHUB_WORKSPACE}/openssl.props" PCBuild/
+          Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\ -Verbose
 
       - name: Windows Install sphinx-build
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
