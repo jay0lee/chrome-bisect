@@ -117,7 +117,7 @@ jobs:
 
       - name: Windows NASM Install
         uses: ilammy/setup-nasm@v1
-        if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        if: runner.os == 'Windows' && runner.arch == 'X64' && steps.cache-python-ssl.outputs.cache-hit != 'true'
 
       - name: Config OpenSSL
         if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
