@@ -53,7 +53,7 @@ jobs:
           path: |
             bin.tar.xz
             src/cpython
-          key: cbisect-${{ matrix.jid }}-20250416
+          key: cbisect-${{ matrix.jid }}-20250416-01
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
@@ -169,7 +169,7 @@ jobs:
           echo "COMPILED_PYTHON_VERSION=${COMPILED_PYTHON_VERSION}" >> $GITHUB_ENV
 
       - name: Mac/Linux Configure Python
-        if: runner.os != 'Windows-NOOOPE' && steps.cache-python-ssl.outputs.cache-hit != 'true'
+        if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         run: |
           cd "${PYTHON_SOURCE_PATH}"
           ./configure --with-openssl="${OPENSSL_INSTALL_PATH}" \
@@ -231,7 +231,7 @@ jobs:
             $env:arch =  "ARM64"
           }
           Write-Output "Using arch $($env:arch)..."
-          PCBuild\build.bat -c Release -p $env:arch
+          PCBuild\build.bat -c Release -p $env:arch --pgo
 
       - name: Mac/Linux Build Python
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
