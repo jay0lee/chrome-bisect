@@ -19,6 +19,7 @@ env:
   PYTHON_SOURCE_PATH: ${{ github.workspace }}/src/cpython
   distpath: ${{ github.workspace }}/chrome_bisect
   build_ssl: true
+  CFLAGS: -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_TLS1 -DOPENSSL_NO_TLS1_1
 
 jobs:
   build:
