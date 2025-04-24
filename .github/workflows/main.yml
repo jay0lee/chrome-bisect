@@ -12,7 +12,7 @@ defaults:
     shell: bash
 
 env:
-  OPENSSL_CONFIG_OPTS: no-fips --api=3.0.0 no-legacy no-deprecated
+  OPENSSL_CONFIG_OPTS: no-fips no-deprecated
   OPENSSL_INSTALL_PATH: ${{ github.workspace }}/bin/ssl
   OPENSSL_SOURCE_PATH: ${{ github.workspace }}/src/openssl
   PYTHON_INSTALL_PATH: ${{ github.workspace }}/bin/python
