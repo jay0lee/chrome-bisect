@@ -312,7 +312,7 @@ jobs:
       - name: Compile bisect script
         run: |
           export codesign_identity="Jay Lee"
-          "${PYTHON}" -m PyInstaller --onedir --clean --noconfirm --distpath $distpath chrome_bisect.py
+          "${PYTHON}" -m PyInstaller --onedir --clean --noconfirm --codesign-identity "$codesign_identity" --distpath $distpath chrome_bisect.py
           cp roots.pem $distpath/chrome_bisect/
 
       - name: Run bisect executable
