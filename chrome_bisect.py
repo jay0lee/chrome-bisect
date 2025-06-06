@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 ''' wrapper for bisect-builds.py which simplifies option setting '''
+from codecs import decode
 from platform import system, machine
 import os
 import sys
@@ -11,6 +12,7 @@ import bisect_builds
 from version import version as __version__
 __author__ = "Jay Lee <jay0lee@gmail.com>"
 __appname__ = "Chrome Bisect"
+
 
 def get_relative_chrome_versions(minus=0):
     ''' returns current Chrome stable milestone number minus value of minus'''
@@ -28,6 +30,7 @@ def get_relative_chrome_versions(minus=0):
                 milestones.append(milestone)
     milestones.sort(reverse=True)
     return milestones[minus]
+
 
 def detect_archive():
     '''returns an appropriate value for archive based on current OS and architecture.'''
@@ -94,6 +97,12 @@ def add_default_args(args):
 
     return args
 
+def add_default_chrome_args(args):
+    '''sets appropriate arguments that bisect-builds.py will pass to Chromium binaries'''
+
+    args.append('--enable-chrome-browser-cloud-management')
+    return args
+    
 def main():
     '''main screen turn on'''
     if '--' in sys.argv:
@@ -104,11 +113,17 @@ def main():
         bisect_args = sys.argv
         chrome_args = []
     os.environ['REQUESTS_CA_BUNDLE'] = 'roots.pem'
-    os.environ['SSL_CERT_FILE'] = 'roots.pem'    
+    os.environ['SSL_CERT_FILE'] = 'roots.pem'
+    # secret, not really secret
+    os.environ['GOOGLE_API_KEY'] = decode('NVmnFlObSBm7wRPR5dUolxDHcnyXg_lUV4YKYTp', 'rot13')
+    os.environ['GOOGLE_DEFAULT_CLIENT_SECRET'] = decode('TBPFCK-LDdWORqtJDArsuKlwsQBXee5bY8W', 'rot13')
+    os.environ['GOOGLE_DEFAULT_CLIENT_ID'] = decode('933175750481-eo2epca4c5a4wnyueudoefv1nryusa8p.nccf.tbbtyrhfrepbagrag.pbz', 'rot13')
     bisect_args = add_default_args(bisect_args)
+    chrome_args = add_default_chrome_args(chrome_args)
     sys.argv = bisect_args + chrome_args
     print(f'running bisect-builds.py with options: {" ".join(sys.argv[1:])}')
     bisect_builds.main()
+
 
 if __name__ == '__main__':
     try:
