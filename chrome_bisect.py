@@ -112,12 +112,18 @@ def main():
     else:
         bisect_args = sys.argv
         chrome_args = []
-    os.environ['REQUESTS_CA_BUNDLE'] = 'roots.pem'
-    os.environ['SSL_CERT_FILE'] = 'roots.pem'
+    if not os.environ.get('REQUESTS_CA_BUNDLE'):
+        os.environ['REQUESTS_CA_BUNDLE'] = 'roots.pem'
+    if not os.environ.get('SSL_CERT_FILE'):
+        os.environ['SSL_CERT_FILE'] = 'roots.pem'
+    
     # secret, not really secret
-    os.environ['GOOGLE_API_KEY'] = decode('NVmnFlObSBm7wRPR5dUolxDHcnyXg_lUV4YKYTp', 'rot13')
-    os.environ['GOOGLE_DEFAULT_CLIENT_SECRET'] = decode('TBPFCK-LDdWORqtJDArsuKlwsQBXee5bY8W', 'rot13')
-    os.environ['GOOGLE_DEFAULT_CLIENT_ID'] = decode('933175750481-eo2epca4c5a4wnyueudoefv1nryusa8p.nccf.tbbtyrhfrepbagrag.pbz', 'rot13')
+    if not os.environ.get('GOOGLE_API_KEY'):
+        os.environ['GOOGLE_API_KEY'] = decode('NVmnFlObSBm7wRPR5dUolxDHcnyXg_lUV4YKYTp', 'rot13')
+    if not os.environ.get('GOOGLE_DEFAULT_CLIENT_SECRET'):
+        os.environ['GOOGLE_DEFAULT_CLIENT_SECRET'] = decode('TBPFCK-LDdWORqtJDArsuKlwsQBXee5bY8W', 'rot13')
+    if not os.environ.get('GOOGLE_DEFAULT_CLIENT_ID'):
+        os.environ['GOOGLE_DEFAULT_CLIENT_ID'] = decode('933175750481-eo2epca4c5a4wnyueudoefv1nryusa8p.nccf.tbbtyrhfrepbagrag.pbz', 'rot13')
     bisect_args = add_default_args(bisect_args)
     chrome_args = add_default_chrome_args(chrome_args)
     sys.argv = bisect_args + chrome_args
