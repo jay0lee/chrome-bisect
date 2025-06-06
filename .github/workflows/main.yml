@@ -65,6 +65,14 @@ jobs:
         run: |
           tar xvvf bin.tar.xz
 
+      - name: MacOS import developer certificates for signing
+        if: runner.os == 'macOS'
+        uses: apple-actions/import-codesign-certs@v5
+        with:
+          keychain: signing_temp
+          p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
+          p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
+
       - name: Windows Configure VCode
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -303,6 +311,7 @@ jobs:
 
       - name: Compile bisect script
         run: |
+          export codesign_identity="Jay Lee"
           "${PYTHON}" -m PyInstaller --onedir --clean --noconfirm --distpath $distpath chrome_bisect.py
           cp roots.pem $distpath/chrome_bisect/
 
@@ -325,6 +334,14 @@ jobs:
             zip -r "$archivefile" .
           fi
           mv -v "$archivefile" "$GITHUB_WORKSPACE"
+
+      - name: MacOS send binary for Apple notarization
+        if: runner.os == 'macOS'
+        env:
+          ASP_NOTARIZE: ${{ secrets.ASP_NOTARIZE }}
+        run: |
+          xcrun notarytool submit --apple-id "jay0lee@gmail.com" --password "$ASP_NOTARIZE" --team-id GZ85H2DRLM "chrome-bisect-*.zip"
+          rm -v "$zipfilename"
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
