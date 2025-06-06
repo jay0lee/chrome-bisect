@@ -341,7 +341,7 @@ jobs:
         if: runner.os == 'macOS'
         env:
           ASP_NOTARIZE: ${{ secrets.ASP_NOTARIZE }}
-          FILENAME: ${{ steps.package-binaries.archivefile }}
+          FILENAME: ${{ steps.package-binaries.outputs.archivefile }}
         run: |
           filename=
           xcrun notarytool submit --apple-id "jay0lee@gmail.com" --password "$ASP_NOTARIZE" --team-id GZ85H2DRLM "$FILENAME"
@@ -351,7 +351,7 @@ jobs:
         with:
           name: chrome-bisect-${{ matrix.jid }}
           path: |
-            ${{ steps.package-binaries.archivefile }}
+            ${{ steps.package-binaries.outputs.archivefile }}
 
       - name: Tar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
