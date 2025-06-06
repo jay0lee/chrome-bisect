@@ -111,7 +111,7 @@ def main():
         chrome_args = sys.argv[split_at:]
     else:
         bisect_args = sys.argv
-        chrome_args = []
+        chrome_args = ['--']
     if not os.environ.get('REQUESTS_CA_BUNDLE'):
         os.environ['REQUESTS_CA_BUNDLE'] = 'roots.pem'
     if not os.environ.get('SSL_CERT_FILE'):
