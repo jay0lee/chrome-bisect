@@ -321,6 +321,7 @@ jobs:
           $distpath/chrome_bisect/chrome_bisect --version
 
       - name: Package binaries
+        id: package-binaries
         run: |
           # MacOS and it's old bash causes us this pain...
           export runner_os=$(echo "$RUNNER_OS" | tr '[:upper:]' '[:lower:]')
@@ -334,21 +335,23 @@ jobs:
             zip -r "$archivefile" .
           fi
           mv -v "$archivefile" "$GITHUB_WORKSPACE"
+          echo "archivefile=${archivefile}" >> "$GITHUB_OUTPUT"
 
       - name: MacOS send binary for Apple notarization
         if: runner.os == 'macOS'
         env:
           ASP_NOTARIZE: ${{ secrets.ASP_NOTARIZE }}
+          FILENAME: ${{ steps.package-binaries.archivefile }}
         run: |
-          xcrun notarytool submit --apple-id "jay0lee@gmail.com" --password "$ASP_NOTARIZE" --team-id GZ85H2DRLM "chrome-bisect-*.zip"
-          rm -v "$zipfilename"
+          filename=
+          xcrun notarytool submit --apple-id "jay0lee@gmail.com" --password "$ASP_NOTARIZE" --team-id GZ85H2DRLM "$FILENAME"
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: chrome-bisect-${{ matrix.jid }}
           path: |
-            chrome-bisect-*.zip
+            ${{ steps.package-binaries.archivefile }}
 
       - name: Tar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -374,7 +377,7 @@ jobs:
         with:
           vt_api_key: ${{ secrets.VT_API_KEY }}
           files: |
-            chrome-bisect-*/*.zip
+            ${{ steps.package-binaries.archivefile }}
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -384,4 +387,4 @@ jobs:
           draft: false
           title: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
           files: |
-            chrome-bisect-*/*.zip
+            ${{ steps.package-binaries.archivefile }}
