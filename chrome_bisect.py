@@ -42,7 +42,7 @@ def detect_archive():
       case 'Windows', 'AMD64':
         archive = 'win64'
       case 'Linux', 'x86_64':
-        archive = 'linux-64'
+        archive = 'linux64'
       case 'Linux', 'aarch64':
         archive = 'linux-arm'
       case 'Darwin', 'arm64':
