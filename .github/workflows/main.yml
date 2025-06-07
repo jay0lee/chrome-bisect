@@ -12,7 +12,7 @@ defaults:
     shell: bash
 
 env:
-  OPENSSL_CONFIG_OPTS: no-fips
+  OPENSSL_CONFIG_OPTS: no-fips --api=3.0.0
   OPENSSL_INSTALL_PATH: ${{ github.workspace }}/bin/ssl
   OPENSSL_SOURCE_PATH: ${{ github.workspace }}/src/openssl
   PYTHON_INSTALL_PATH: ${{ github.workspace }}/bin/python
@@ -58,7 +58,7 @@ jobs:
           path: |
             bin.tar.xz
             src/cpython
-          key: cbisect-${{ matrix.jid }}-20250424
+          key: cbisect-${{ matrix.jid }}-20250607
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
