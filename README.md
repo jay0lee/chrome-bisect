@@ -137,3 +137,6 @@ As mentioned above, Chrome Bisect has a few limitations that you should be aware
      * Adobe Flash Player
      * Widevine DRM
 * If you have an issue on Chrome OS try reproducing it in Chrome browser on Windows, Mac or Linux and see if you can utilize the tool there. The tool does support `--archive chromeos` on Linux which runs like Chrome OS but is not really full Chrome OS, your mileage may vary.
+* The script now has limited support for enterprise policies including Chrome Enterprise Core / Premium.
+  * To enroll in Chrome Enterprise Core / CBCM you need to set an enrollment token. The process is identical to official Chrome on Windows / MacOS. On Linux the file to store the token in should be `/etc/chromium/policies/enrollment/CloudManagementEnrollmentToken`.
+  * To use Chrome Sync and get user cloud policies the user must join the group at https://groups.google.com/u/0/a/chromium.org/g/google-browser-signin-testaccounts/about
