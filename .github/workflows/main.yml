@@ -46,19 +46,19 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           python-version: '3.x'
           check-latest: true
 
       - name: Cache multiple paths
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-python-ssl
         with:
           path: |
             bin.tar.xz
             src/cpython
-          key: cbisect-${{ matrix.jid }}-20250607
+          key: cbisect-${{ matrix.jid }}-20251002
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
@@ -67,14 +67,14 @@ jobs:
 
       - name: MacOS import developer certificates for signing
         if: runner.os == 'macOS'
-        uses: apple-actions/import-codesign-certs@v5
+        uses: apple-actions/import-codesign-certs@95e84a1a18f2bdbc5c6ab9b7f4429372e4b13a8b # v5.0.3
         with:
           keychain: signing_temp
           p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
           p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
 
       - name: Windows Configure VCode
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         with:
           arch: ${{ runner.arch }}
@@ -132,7 +132,7 @@ jobs:
           echo "COMPILED_OPENSSL_VERSION=${COMPILED_OPENSSL_VERSION}" >> $GITHUB_ENV
 
       - name: Windows NASM Install
-        uses: ilammy/setup-nasm@v1
+        uses: ilammy/setup-nasm@72793074d3c8cdda771dba85f6deafe00623038b #v1.5.2
         if: runner.os == 'Windows' && runner.arch == 'X64' && steps.cache-python-ssl.outputs.cache-hit != 'true'
 
       - name: Config OpenSSL
@@ -347,7 +347,7 @@ jobs:
           xcrun notarytool submit --apple-id "jay0lee@gmail.com" --password "$ASP_NOTARIZE" --team-id GZ85H2DRLM "$FILENAME"
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: chrome-bisect-${{ matrix.jid }}
           path: |
@@ -363,7 +363,7 @@ jobs:
     needs: build
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         
       - name: Set datetime version string
         id: dateversion
@@ -373,13 +373,13 @@ jobs:
           echo "dateversion=${dateversion}" >> $GITHUB_OUTPUT
 
       - name: VirusTotal Scan
-        uses: crazy-max/ghaction-virustotal@v4
+        uses: crazy-max/ghaction-virustotal@d34968c958ae283fe976efed637081b9f9dcf74f # v4.2.0
         with:
           vt_api_key: ${{ secrets.VT_API_KEY }}
           files: |
             chrome-bisect-*/*.zip
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0 # v1.2.1
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: ${{ steps.dateversion.outputs.dateversion }}
