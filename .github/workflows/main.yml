@@ -379,12 +379,13 @@ jobs:
           files: |
             chrome-bisect-*/*.zip
 
-      - uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0 # v1.2.1
+      - name: Publish release
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ steps.dateversion.outputs.dateversion }}
-          prerelease: false
           draft: false
-          title: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
+          prerelease: false
+          tag_name: "${{ steps.dateversion.outputs.dateversion }}"
+          fail_on_unmatched_files: true
+          name: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
           files: |
             chrome-bisect-*/*.zip
