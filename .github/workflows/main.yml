@@ -31,7 +31,7 @@ jobs:
             jid: 1
           - os: ubuntu-22.04-arm
             jid: 2
-          - os: macos-13
+          - os: macos-15-intel
             jid: 3
           - os: macos-14
             jid: 4
@@ -58,7 +58,7 @@ jobs:
           path: |
             bin.tar.xz
             src/cpython
-          key: cbisect-${{ matrix.jid }}-20251002
+          key: cbisect-${{ matrix.jid }}-20251007
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
