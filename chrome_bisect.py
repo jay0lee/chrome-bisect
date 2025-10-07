@@ -4,7 +4,9 @@
 from codecs import decode
 from platform import system, machine
 import os
+import ssl
 import sys
+import urllib.request
 
 import requests
 
@@ -14,12 +16,27 @@ __author__ = "Jay Lee <jay0lee@gmail.com>"
 __appname__ = "Chrome Bisect"
 
 
+def unsecure_urllib_request_opener():
+    ''' utility function that disables TLS verify '''
+    urllib.request._opener = urllib.request.build_opener()
+    for handler in urllib.request._opener.handlers:
+        if isinstance(handler, urllib.request.HTTPSHandler):
+            insecure_context = ssl.create_default_context()
+            # Disable hostname verification
+            insecure_context.check_hostname = False
+            # Disable certificate verification
+            insecure_context.verify_mode = ssl.CERT_NONE
+            handler._context = insecure_context
+
+
 def get_relative_chrome_versions(minus=0):
     ''' returns current Chrome stable milestone number minus value of minus'''
+    global verify
     url = 'https://versionhistory.googleapis.com' \
           '/v1/chrome/platforms/all/channels/stable/versions/all/releases' \
           '?fields=releases%2Fversion%2CnextPageToken'
-    resp = requests.get(url)
+    print(f'verify is {verify}.')
+    resp = requests.get(url, verify=verify)
     versions = resp.json().get('releases')
     milestones = []
     for version in versions:
@@ -112,10 +129,18 @@ def main():
     else:
         bisect_args = sys.argv
         chrome_args = ['--']
-    if not os.environ.get('REQUESTS_CA_BUNDLE'):
-        os.environ['REQUESTS_CA_BUNDLE'] = 'roots.pem'
-    if not os.environ.get('SSL_CERT_FILE'):
-        os.environ['SSL_CERT_FILE'] = 'roots.pem'
+    global verify
+    verify = True
+    if '--do-not-verify-tls' in bisect_args:
+        unsecure_urllib_request_opener()
+        verify = False
+        bisect_args.remove('--do-not-verify-tls')
+        print('WARNING: TLS verify is turned off.')
+    if verify:
+        if not os.environ.get('REQUESTS_CA_BUNDLE'):
+            os.environ['REQUESTS_CA_BUNDLE'] = 'roots.pem'
+        if not os.environ.get('SSL_CERT_FILE'):
+            os.environ['SSL_CERT_FILE'] = 'roots.pem'
     
     # secret, not really secret
     if not os.environ.get('GOOGLE_API_KEY'):
