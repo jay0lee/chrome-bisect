@@ -385,6 +385,8 @@ jobs:
           draft: true
           prerelease: false
           fail_on_unmatched_files: true
+          tag_name: "${{ steps.dateversion.outputs.dateversion }}"
+          name: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
           files: |
             chrome-bisect-*/*.zip
 
