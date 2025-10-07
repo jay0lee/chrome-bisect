@@ -379,13 +379,19 @@ jobs:
           files: |
             chrome-bisect-*/*.zip
 
+      - name: Draft release
+        uses: softprops/action-gh-release@aec2ec56f94eb8180ceec724245f64ef008b89f5 # v2.4.0
+        with:
+          draft: true
+          prerelease: false
+          fail_on_unmatched_files: true
+          files: |
+            chrome-bisect-*/*.zip
+
       - name: Publish release
         uses: softprops/action-gh-release@aec2ec56f94eb8180ceec724245f64ef008b89f5 # v2.4.0
         with:
           draft: false
           prerelease: false
           tag_name: "${{ steps.dateversion.outputs.dateversion }}"
-          fail_on_unmatched_files: true
           name: "Chrome Bisect ${{ steps.dateversion.outputs.dateversion }}"
-          files: |
-            chrome-bisect-*/*.zip
