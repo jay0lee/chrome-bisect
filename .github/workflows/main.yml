@@ -340,11 +340,15 @@ jobs:
       - name: MacOS send binary for Apple notarization
         if: runner.os == 'macOS'
         env:
-          ASP_NOTARIZE: ${{ secrets.ASP_NOTARIZE }}
+          APPLE_KEY: ${{ secrets.APPLE_KEY }}
+          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
           FILENAME: ${{ steps.package-binaries.outputs.archivefile }}
         run: |
-          filename=
-          xcrun notarytool submit --apple-id "jay0lee@gmail.com" --password "$ASP_NOTARIZE" --team-id GZ85H2DRLM "$FILENAME"
+          export KEY_FILE="$(mktemp).p8"
+          trap 'rm -f "$KEY_FILE"' EXIT
+          echo "$APPLE_KEY" > "$KEY_FILE"
+          xcrun notarytool submit --key "$KEY_FILE" --key-id "$APPLE_KEY_ID" --issuer "$APPLE_ISSUER_ID" "$FILENAME"
 
       - name: upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
