@@ -41,24 +41,24 @@ jobs:
             jid: 6
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
           fetch-depth: 0
 
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.x'
           check-latest: true
 
       - name: Cache multiple paths
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-python-ssl
         with:
           path: |
             bin.tar.xz
             src/cpython
-          key: cbisect-${{ matrix.jid }}-20260226
+          key: cbisect-${{ matrix.jid }}-20260523
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
@@ -67,7 +67,7 @@ jobs:
 
       - name: MacOS import developer certificates for signing
         if: runner.os == 'macOS'
-        uses: apple-actions/import-codesign-certs@95e84a1a18f2bdbc5c6ab9b7f4429372e4b13a8b # v5.0.3
+        uses: apple-actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7.0.0
         with:
           keychain: signing_temp
           p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
@@ -351,7 +351,7 @@ jobs:
           xcrun notarytool submit --key "$KEY_FILE" --key-id "$APPLE_KEY_ID" --issuer "$APPLE_ISSUER_ID" "$FILENAME"
 
       - name: upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: chrome-bisect-${{ matrix.jid }}
           path: |
@@ -367,7 +367,7 @@ jobs:
     needs: build
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         
       - name: Set datetime version string
         id: dateversion
@@ -377,14 +377,14 @@ jobs:
           echo "dateversion=${dateversion}" >> $GITHUB_OUTPUT
 
       - name: VirusTotal Scan
-        uses: crazy-max/ghaction-virustotal@d34968c958ae283fe976efed637081b9f9dcf74f # v4.2.0
+        uses: crazy-max/ghaction-virustotal@936d8c5c00afe97d3d9a1af26d017cfdf26800a2 # v5.0.0
         with:
           vt_api_key: ${{ secrets.VT_API_KEY }}
           files: |
             chrome-bisect-*/*.zip
 
       - name: Draft release
-        uses: softprops/action-gh-release@aec2ec56f94eb8180ceec724245f64ef008b89f5 # v2.4.0
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           draft: true
           prerelease: false
@@ -395,7 +395,7 @@ jobs:
             chrome-bisect-*/*.zip
 
       - name: Publish release
-        uses: softprops/action-gh-release@aec2ec56f94eb8180ceec724245f64ef008b89f5 # v2.4.0
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           draft: false
           prerelease: false
