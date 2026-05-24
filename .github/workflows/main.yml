@@ -35,7 +35,7 @@ jobs:
             jid: 3
           - os: macos-14
             jid: 4
-          - os: windows-2025
+          - os: windows-2025-vs2026
             jid: 5
           - os: windows-11-arm
             jid: 6
