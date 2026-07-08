@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 ''' wrapper for bisect-builds.py which simplifies option setting '''
+import argparse
 import codecs
+import contextlib
 from platform import system, machine
 import os
 import ssl
@@ -27,6 +29,17 @@ def unsecure_urllib_request_opener():
             # Disable certificate verification
             insecure_context.verify_mode = ssl.CERT_NONE
             handler._context = insecure_context
+
+
+@contextlib.contextmanager
+def _patched_argv(argv):
+    '''Temporarily replace sys.argv, restoring the original on exit.'''
+    original = sys.argv
+    sys.argv = argv
+    try:
+        yield
+    finally:
+        sys.argv = original
 
 
 def get_relative_chrome_versions(minus=0, verify=True):
@@ -77,84 +90,101 @@ def detect_archive():
     return archive
 
 
-def _arg_present(args, *flags):
-    '''Check if any of the given flags are present in args.'''
-    return any(arg.split('=')[0] in flags for arg in args)
+def _build_parser():
+    '''Build argparse parser for chrome_bisect-specific arguments.'''
+    parser = argparse.ArgumentParser(
+        prog='chrome_bisect',
+        description='Wrapper for bisect-builds.py with smart defaults.',
+        add_help=False,  # Let --help pass through to bisect-builds.py
+    )
+    parser.add_argument('--version', action='store_true',
+                        help='Show version info and exit.')
+    parser.add_argument('--do-not-verify-tls', action='store_true',
+                        help='Disable TLS certificate verification.')
+    parser.add_argument('-a', '--archive', type=str, default=None,
+                        help='Archive type (auto-detected if not set).')
+    parser.add_argument('-g', '--good', type=str, default=None,
+                        help='Known good revision (default: stable minus 6).')
+    return parser
 
-
-def add_default_args(args, verify=True):
-    '''Sets appropriate default arguments for bisect-builds.py.'''
-    
-    detected_archive = detect_archive()
-
-    if '--version' in args:
-        print(f'{__appname__} {__version__}')
-        print(f'Author: {__author__}')
-        print(f'Detected --archive: {detected_archive}')
-        sys.exit(0)
-
-    # return --help quick
-    if '--help' in args or '-h' in args:
-        return args
-
-    # always add --verify-range and --use-local-cache
-    for def_arg in ['--verify-range', '--use-local-cache']:
-        if def_arg not in args:
-            args.append(def_arg)
-
-    # if --archive is not set detect an appropriate value to set
-    if not _arg_present(args, '-a', '--archive'):
-        args.extend(['--archive', detected_archive])
-
-    # if --good is not set set to Chrome stable milestone - 6
-    if not _arg_present(args, '-g', '--good'):
-        good = get_relative_chrome_versions(6, verify=verify)
-        good_milestone = f'M{good}'
-        args.extend(['--good', good_milestone])
-
-    return args
 
 def add_default_chrome_args(args):
     '''Sets appropriate arguments that bisect-builds.py will pass to Chromium binaries.'''
 
     args.append('--enable-chrome-browser-cloud-management')
     return args
-    
+
+
 def main():
     '''Parse arguments, configure environment, and run bisect-builds.py.'''
-    if '--' in sys.argv:
-        split_at = sys.argv.index('--')
-        bisect_args = sys.argv[:split_at]
-        chrome_args = sys.argv[split_at:]
+    # Split at -- to separate bisect args from chrome args
+    argv_rest = sys.argv[1:]
+    if '--' in argv_rest:
+        split_at = argv_rest.index('--')
+        raw_bisect_args = argv_rest[:split_at]
+        chrome_args = argv_rest[split_at:]  # includes the '--'
     else:
-        bisect_args = sys.argv
+        raw_bisect_args = argv_rest
         chrome_args = ['--']
-    verify = True
-    if '--do-not-verify-tls' in bisect_args:
+
+    parser = _build_parser()
+    our_args, passthrough_args = parser.parse_known_args(raw_bisect_args)
+
+    detected_archive = detect_archive()
+
+    # Handle --version
+    if our_args.version:
+        print(f'{__appname__} {__version__}')
+        print(f'Author: {__author__}')
+        print(f'Detected --archive: {detected_archive}')
+        sys.exit(0)
+
+    # Handle TLS verification
+    verify = not our_args.do_not_verify_tls
+    if not verify:
         unsecure_urllib_request_opener()
-        verify = False
-        bisect_args.remove('--do-not-verify-tls')
         print('WARNING: TLS verify is turned off.')
-    if verify:
+    else:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         roots_pem = os.path.join(script_dir, 'roots.pem')
         if not os.environ.get('REQUESTS_CA_BUNDLE'):
             os.environ['REQUESTS_CA_BUNDLE'] = roots_pem
         if not os.environ.get('SSL_CERT_FILE'):
             os.environ['SSL_CERT_FILE'] = roots_pem
-    
-    # secret, not really secret
+
+    # Set API keys (public Chromium API keys, safe to embed)
     if not os.environ.get('GOOGLE_API_KEY'):
         os.environ['GOOGLE_API_KEY'] = codecs.decode('NVmnFlObSBm7wRPR5dUolxDHcnyXg_lUV4YKYTp', 'rot13')
     if not os.environ.get('GOOGLE_DEFAULT_CLIENT_SECRET'):
         os.environ['GOOGLE_DEFAULT_CLIENT_SECRET'] = codecs.decode('TBPFCK-LDdWORqtJDArsuKlwsQBXee5bY8W', 'rot13')
     if not os.environ.get('GOOGLE_DEFAULT_CLIENT_ID'):
         os.environ['GOOGLE_DEFAULT_CLIENT_ID'] = codecs.decode('933175750481-eo2epca4c5a4wnyueudoefv1nryusa8p.nccf.tbbtyrhfrepbagrag.pbz', 'rot13')
-    bisect_args = add_default_args(bisect_args, verify=verify)
+
+    # Build the arg list for bisect-builds.py
+    bisect_args = list(passthrough_args)
+
+    # If --help is requested, pass through without adding defaults
+    if '-h' not in bisect_args and '--help' not in bisect_args:
+        # Always include --verify-range and --use-local-cache
+        for flag in ['--verify-range', '--use-local-cache']:
+            if flag not in bisect_args:
+                bisect_args.append(flag)
+
+        # Apply --archive default
+        bisect_args.extend(['--archive', our_args.archive or detected_archive])
+
+        # Apply --good default
+        if our_args.good:
+            bisect_args.extend(['--good', our_args.good])
+        else:
+            good = get_relative_chrome_versions(6, verify=verify)
+            bisect_args.extend(['--good', f'M{good}'])
+
     chrome_args = add_default_chrome_args(chrome_args)
-    sys.argv = bisect_args + chrome_args
-    print(f'running bisect-builds.py with options: {" ".join(sys.argv[1:])}')
-    bisect_builds.main()
+    argv = [sys.argv[0]] + bisect_args + chrome_args
+    print(f'running bisect-builds.py with options: {" ".join(argv[1:])}')
+    with _patched_argv(argv):
+        bisect_builds.main()
 
 
 if __name__ == '__main__':
