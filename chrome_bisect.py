@@ -143,7 +143,12 @@ def main():
         unsecure_urllib_request_opener()
         print('WARNING: TLS verify is turned off.')
     else:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        # In a PyInstaller bundle, __file__ points to a temp extraction dir
+        # but roots.pem is alongside the executable in --onedir mode.
+        if getattr(sys, 'frozen', False):
+            script_dir = os.path.dirname(sys.executable)
+        else:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
         roots_pem = os.path.join(script_dir, 'roots.pem')
         # Explicitly configure urllib to use the bundled CA bundle.
         # The SSL_CERT_FILE env var alone isn't sufficient in
