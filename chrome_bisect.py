@@ -145,6 +145,13 @@ def main():
     else:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         roots_pem = os.path.join(script_dir, 'roots.pem')
+        # Explicitly configure urllib to use the bundled CA bundle.
+        # The SSL_CERT_FILE env var alone isn't sufficient in
+        # PyInstaller-bundled builds with custom OpenSSL.
+        secure_context = ssl.create_default_context(cafile=roots_pem)
+        https_handler = urllib.request.HTTPSHandler(context=secure_context)
+        urllib.request._opener = urllib.request.build_opener(https_handler)
+        # Also set SSL_CERT_FILE as a fallback for bisect_builds.py
         if not os.environ.get('SSL_CERT_FILE'):
             os.environ['SSL_CERT_FILE'] = roots_pem
 
