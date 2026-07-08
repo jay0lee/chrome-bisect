@@ -46,6 +46,9 @@ def get_relative_chrome_versions(minus=0):
             if milestone not in milestones:
                 milestones.append(milestone)
     milestones.sort(reverse=True)
+    if minus >= len(milestones):
+        print(f'ERROR: Cannot go back {minus} milestones; only {len(milestones)} known.')
+        sys.exit(1)
     return milestones[minus]
 
 
@@ -137,10 +140,12 @@ def main():
         bisect_args.remove('--do-not-verify-tls')
         print('WARNING: TLS verify is turned off.')
     if verify:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        roots_pem = os.path.join(script_dir, 'roots.pem')
         if not os.environ.get('REQUESTS_CA_BUNDLE'):
-            os.environ['REQUESTS_CA_BUNDLE'] = 'roots.pem'
+            os.environ['REQUESTS_CA_BUNDLE'] = roots_pem
         if not os.environ.get('SSL_CERT_FILE'):
-            os.environ['SSL_CERT_FILE'] = 'roots.pem'
+            os.environ['SSL_CERT_FILE'] = roots_pem
     
     # secret, not really secret
     if not os.environ.get('GOOGLE_API_KEY'):
