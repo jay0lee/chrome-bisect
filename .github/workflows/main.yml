@@ -271,10 +271,17 @@ jobs:
           "$PYTHON" -V
           "$PYTHON" -c "import ssl; print(f'Using {ssl.OPENSSL_VERSION}')"
 
+      - name: Create venv
+        run: |
+          "${PYTHON}" -m venv "${GITHUB_WORKSPACE}/venv"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            echo "PYTHON=${GITHUB_WORKSPACE}/venv/Scripts/python.exe" >> $GITHUB_ENV
+          else
+            echo "PYTHON=${GITHUB_WORKSPACE}/venv/bin/python3" >> $GITHUB_ENV
+          fi
+
       - name: Upgrade pip, wheel, etc
         run: |
-          curl -O https://bootstrap.pypa.io/get-pip.py
-          "${PYTHON}" get-pip.py
           "${PYTHON}" -m pip install --upgrade pip
           "${PYTHON}" -m pip install --upgrade wheel
           "${PYTHON}" -m pip install --upgrade setuptools
@@ -293,7 +300,7 @@ jobs:
 
       - name: Install requirements
         run: |
-          "${PYTHON}" -m pip install --user -r requirements.txt
+          "${PYTHON}" -m pip install -r requirements.txt
         
       - name: Download bisect script
         run: |
