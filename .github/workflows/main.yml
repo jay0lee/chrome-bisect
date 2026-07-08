@@ -330,6 +330,55 @@ jobs:
           $distpath/chrome_bisect/chrome_bisect --help
           $distpath/chrome_bisect/chrome_bisect --version
 
+      - name: "Smoke test: end-to-end bisect with synthetic good/bad boundary"
+        if: runner.os == 'Linux'
+        timeout-minutes: 30
+        run: |
+          # Perform a real bisect to verify the full pipeline works:
+          # downloading builds, launching Chromium, and narrowing a range.
+          #
+          # Since we need deterministic good/bad results without user input,
+          # we create a synthetic boundary: a helper script checks each
+          # build's major version and marks anything below a threshold as
+          # "good" and anything at or above it as "bad". The threshold is
+          # set to stable-3 (the midpoint of the default stable-6..HEAD
+          # range) so the bisect has real work to do on both sides.
+          threshold=$(python3 -c "
+          import urllib.request, json
+          url = 'https://versionhistory.googleapis.com/v1/chrome/platforms/all/channels/stable/versions/all/releases?fields=releases%2Fversion%2CnextPageToken'
+          data = json.loads(urllib.request.urlopen(url).read())
+          milestones = sorted(set(int(r['version'].split('.')[0]) for r in data['releases']), reverse=True)
+          print(milestones[3])
+          ")
+          echo ""
+          echo "=== Smoke test: end-to-end bisect with synthetic good/bad boundary ==="
+          echo "Performing a bisect to verify the full pipeline (download, launch, narrow range)."
+          echo "Builds with major version < M${threshold} will be marked 'good'."
+          echo "Builds with major version >= M${threshold} will be marked 'bad'."
+          echo ""
+
+          # Helper script: exit 0 (good) if version < threshold,
+          # exit 1 (bad) if version >= threshold.
+          cat > /tmp/bisect_test.sh << 'EOF'
+          #!/bin/bash
+          version=$("$1" --no-sandbox --product-version 2>/dev/null | cut -d. -f1)
+          if [ -z "$version" ]; then
+            echo "Could not determine Chromium version"
+            exit 1
+          fi
+          if [ "$version" -ge "$2" ]; then
+            echo "Version $version >= $2 (bad)"
+            exit 1
+          fi
+          echo "Version $version < $2 (good)"
+          exit 0
+          EOF
+          chmod +x /tmp/bisect_test.sh
+
+          $distpath/chrome_bisect/chrome_bisect \
+            --not-interactive \
+            --command "/tmp/bisect_test.sh %p ${threshold}"
+
       - name: Package binaries
         id: package-binaries
         run: |
