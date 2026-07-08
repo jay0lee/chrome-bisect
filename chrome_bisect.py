@@ -4,13 +4,12 @@
 import argparse
 import codecs
 import contextlib
+import json
 from platform import system, machine
 import os
 import ssl
 import sys
 import urllib.request
-
-import requests
 
 import bisect_builds
 from version import version as __version__
@@ -42,14 +41,13 @@ def _patched_argv(argv):
         sys.argv = original
 
 
-def get_relative_chrome_versions(minus=0, verify=True):
+def get_relative_chrome_versions(minus=0):
     '''Returns current Chrome stable milestone number minus value of minus.'''
     url = 'https://versionhistory.googleapis.com' \
           '/v1/chrome/platforms/all/channels/stable/versions/all/releases' \
           '?fields=releases%2Fversion%2CnextPageToken'
-    resp = requests.get(url, verify=verify)
-    resp.raise_for_status()
-    versions = resp.json().get('releases')
+    resp = urllib.request.urlopen(url)
+    versions = json.loads(resp.read()).get('releases')
     if not versions:
         print('ERROR: No release data returned from versionhistory API.')
         sys.exit(1)
@@ -147,8 +145,6 @@ def main():
     else:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         roots_pem = os.path.join(script_dir, 'roots.pem')
-        if not os.environ.get('REQUESTS_CA_BUNDLE'):
-            os.environ['REQUESTS_CA_BUNDLE'] = roots_pem
         if not os.environ.get('SSL_CERT_FILE'):
             os.environ['SSL_CERT_FILE'] = roots_pem
 
@@ -177,7 +173,7 @@ def main():
         if our_args.good:
             bisect_args.extend(['--good', our_args.good])
         else:
-            good = get_relative_chrome_versions(6, verify=verify)
+            good = get_relative_chrome_versions(6)
             bisect_args.extend(['--good', f'M{good}'])
 
     chrome_args = add_default_chrome_args(chrome_args)
