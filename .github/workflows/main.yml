@@ -381,7 +381,26 @@ jobs:
 
           $distpath/chrome_bisect/chrome_bisect \
             --not-interactive \
-            --command "/tmp/bisect_test.sh %p ${threshold}"
+            --command "/tmp/bisect_test.sh %p ${threshold}" \
+            2>&1 | tee /tmp/bisect_output.txt
+
+          # Verify the bisect found the expected milestone boundary.
+          # Extract the changelog URL from bisect output and fetch the
+          # commits via the Gitiles JSON API (fast, no git clone needed).
+          changelog_url=$(grep -oE 'https://chromium.googlesource.com/chromium/src/\+log/[^ ]+' /tmp/bisect_output.txt | head -1)
+          if [ -z "$changelog_url" ]; then
+            echo "ERROR: No changelog URL found in bisect output"
+            exit 1
+          fi
+          echo ""
+          echo "=== Verifying bisect result ==="
+          echo "Changelog URL: ${changelog_url}"
+          if curl --retry 3 --fail -s "${changelog_url}?format=JSON" | grep -q "major version to ${threshold}"; then
+            echo "PASS: Changelog contains the M${threshold} version bump commit"
+          else
+            echo "FAIL: M${threshold} version bump not found in changelog: ${changelog_url}"
+            exit 1
+          fi
 
       - name: Package binaries
         id: package-binaries
