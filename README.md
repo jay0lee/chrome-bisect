@@ -134,7 +134,6 @@ CHANGELOG URL:
 As mentioned above, Chrome Bisect has a few limitations that you should be aware of:
 * Chrome Bisect downloads public Chromium browser binaries to test with, these open-source public builds do not contain everything the official Chrome browser contains and may not be good for testing issues related to:
      * The PDF Viewer
-     * Adobe Flash Player
      * Widevine DRM
 * If you have an issue on Chrome OS try reproducing it in Chrome browser on Windows, Mac or Linux and see if you can utilize the tool there. The tool does support `--archive chromeos` on Linux which runs like Chrome OS but is not really full Chrome OS, your mileage may vary.
 * The script now has limited support for enterprise policies including Chrome Enterprise Core / Premium.
