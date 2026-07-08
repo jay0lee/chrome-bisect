@@ -16,6 +16,7 @@ env:
   OPENSSL_INSTALL_PATH: ${{ github.workspace }}/bin/ssl
   OPENSSL_SOURCE_PATH: ${{ github.workspace }}/src/openssl
   PYTHON_INSTALL_PATH: ${{ github.workspace }}/bin/python
+  PS_PYTHON_INSTALL_PATH: ${{ github.workspace }}\bin\python
   PYTHON_SOURCE_PATH: ${{ github.workspace }}/src/cpython
   distpath: ${{ github.workspace }}/chrome_bisect
   build_ssl: true
@@ -57,8 +58,7 @@ jobs:
         with:
           path: |
             bin.tar.xz
-            src/cpython
-          key: cbisect-${{ matrix.jid }}-20260523
+          key: cbisect-${{ matrix.jid }}-20260709
 
       - name: Untar Cache archive
         if: steps.cache-python-ssl.outputs.cache-hit == 'true'
@@ -104,12 +104,7 @@ jobs:
             MAKE=nmake
             MAKEOPT=""
             PERL="c:\strawberry\perl\bin\perl.exe"
-            if [[ "$RUNNER_ARCH" == "X64" ]]; then
-              export arch_path="amd64"
-            elif [[ "$RUNNER_ARCH" == "ARM64" ]]; then
-              export arch_path="arm64"
-            fi
-            echo "PYTHON=${PYTHON_SOURCE_PATH}/PCbuild/${arch_path}/python.exe" >> $GITHUB_ENV
+            echo "PYTHON=${PYTHON_INSTALL_PATH}/python.exe" >> $GITHUB_ENV
           fi
           echo "We'll run make with: ${MAKEOPT}"
           echo "MAKE=${MAKE}" >> $GITHUB_ENV
@@ -239,18 +234,21 @@ jobs:
           pip install --upgrade sphinx
           sphinx-build --version
 
-      - name: Windows Config/Build Python
+      - name: Windows Config/Build/Install Python
         if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
         shell: powershell
         run: |
           cd "${env:PYTHON_SOURCE_PATH}"
+          # We need our custom openssl.props which uses OpenSSL 3 DLL names
+          Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\ -Verbose
           if (${env:RUNNER_ARCH} -eq "X64") {
             $env:arch = "x64"
-            PCBuild\build.bat -c Release -p $env:arch --pgo
           } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
-            $env:arch =  "ARM64"
-            PCBuild\build.bat -c Release -p $env:arch
+            $env:arch = "ARM64"
           }
+          PCBuild\build.bat -c Release -p $env:arch --pgo
+          .\python.bat PC\layout --precompile --preset-default --copy $env:PS_PYTHON_INSTALL_PATH
+          Get-ChildItem -Path $env:PS_PYTHON_INSTALL_PATH -File
 
       - name: Mac/Linux Build Python
         if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
@@ -331,7 +329,7 @@ jobs:
           $distpath/chrome_bisect/chrome_bisect --version
 
       - name: "Smoke test: end-to-end bisect with synthetic good/bad boundary"
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && runner.arch == 'X64'
         timeout-minutes: 30
         run: |
           # Perform a real bisect to verify the full pipeline works:
