@@ -12,14 +12,7 @@ defaults:
     shell: bash
 
 env:
-  OPENSSL_CONFIG_OPTS: no-fips --api=3.0.0
-  OPENSSL_INSTALL_PATH: ${{ github.workspace }}/bin/ssl
-  OPENSSL_SOURCE_PATH: ${{ github.workspace }}/src/openssl
-  PYTHON_INSTALL_PATH: ${{ github.workspace }}/bin/python
-  PS_PYTHON_INSTALL_PATH: ${{ github.workspace }}\bin\python
-  PYTHON_SOURCE_PATH: ${{ github.workspace }}/src/cpython
   distpath: ${{ github.workspace }}/chrome_bisect
-  build_ssl: true
 
 jobs:
   build:
@@ -47,23 +40,8 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: '3.x'
-          check-latest: true
-
-      - name: Cache multiple paths
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: cache-python-ssl
-        with:
-          path: |
-            bin.tar.xz
-          key: cbisect-${{ matrix.jid }}-20260709
-
-      - name: Untar Cache archive
-        if: steps.cache-python-ssl.outputs.cache-hit == 'true'
-        run: |
-          tar xvvf bin.tar.xz
+      - name: Set up latest Python and OpenSSL
+        uses: jay0lee/python-openssl-latest@v1
 
       - name: MacOS import developer certificates for signing
         if: runner.os == 'macOS'
@@ -72,197 +50,6 @@ jobs:
           keychain: signing_temp
           p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
           p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
-
-      - name: Windows Configure VCode
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
-        if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        with:
-          arch: ${{ runner.arch }}
-
-      - name: Set Env Variables for build
-        run: |
-          echo "We are running on ${RUNNER_OS}"
-          echo "Existing Python Info:"
-          python3 -c "import platform; print(platform.machine())"
-          which python3
-          mkdir -p bin
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            MAKE=make
-            MAKEOPT="-j$(sysctl -n hw.logicalcpu)"
-            PERL=perl
-            echo "MacOS version info:"
-            sw_vers -productVersion
-            MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)
-            echo "MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}" >> $GITHUB_ENV
-            echo "PYTHON=${PYTHON_INSTALL_PATH}/bin/python3" >> $GITHUB_ENV
-          elif [[ "$RUNNER_OS" == "Linux" ]]; then
-            MAKE=make
-            MAKEOPT="-j$(nproc)"
-            PERL=perl
-            echo "PYTHON=${PYTHON_INSTALL_PATH}/bin/python3" >> $GITHUB_ENV
-          elif [[ "$RUNNER_OS" == "Windows" ]]; then
-            MAKE=nmake
-            MAKEOPT=""
-            PERL="c:\strawberry\perl\bin\perl.exe"
-            echo "PYTHON=${PYTHON_INSTALL_PATH}/python.exe" >> $GITHUB_ENV
-          fi
-          echo "We'll run make with: ${MAKEOPT}"
-          echo "MAKE=${MAKE}" >> $GITHUB_ENV
-          echo "MAKEOPT=${MAKEOPT}" >> $GITHUB_ENV
-          echo "PERL=${PERL}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${OPENSSL_INSTALL_PATH}/lib:${PYTHON_INSTALL_PATH}/lib" >> $GITHUB_ENV
-          #echo "PATH=${PATH}:${PYTHON_INSTALL_PATH}/scripts" >> $GITHUB_ENV
-
-      - name: Get latest stable OpenSSL source
-        if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          mkdir -vp "${GITHUB_WORKSPACE}/src"
-          cd "${GITHUB_WORKSPACE}/src"
-          git clone https://github.com/openssl/openssl.git
-          cd "${OPENSSL_SOURCE_PATH}"
-          export LATEST_STABLE_TAG=$(git tag --list openssl-* | grep -v alpha | grep -v beta | sort -Vr | head -n1)
-          echo "Checking out version ${LATEST_STABLE_TAG}"
-          git checkout "${LATEST_STABLE_TAG}"
-          export COMPILED_OPENSSL_VERSION=${LATEST_STABLE_TAG:8} # Trim the openssl- prefix
-          echo "COMPILED_OPENSSL_VERSION=${COMPILED_OPENSSL_VERSION}" >> $GITHUB_ENV
-
-      - name: Windows NASM Install
-        uses: ilammy/setup-nasm@72793074d3c8cdda771dba85f6deafe00623038b #v1.5.2
-        if: runner.os == 'Windows' && runner.arch == 'X64' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-
-      - name: Config OpenSSL
-        if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          cd "$OPENSSL_SOURCE_PATH"
-          if ([ "$RUNNER_OS" == "Windows" ] && [ "$RUNNER_ARCH" == "ARM64" ]); then
-            export CFLAGS=-DNO_INTERLOCKEDOR64
-          fi
-          # --libdir=lib is needed so Python can find OpenSSL libraries
-          "${PERL}" ./Configure --libdir=lib --prefix="${OPENSSL_INSTALL_PATH}" $OPENSSL_CONFIG_OPTS
-          
-      - name: Rename GNU link on Windows
-        if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        shell: bash
-        run: mv /usr/bin/link /usr/bin/gnulink
-
-      - name: Make OpenSSL
-        if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          cd "$OPENSSL_SOURCE_PATH"
-          if ([ "$RUNNER_OS" == "Windows" ] && [ "$RUNNER_ARCH" == "ARM64" ]); then
-            export CFLAGS=-DNO_INTERLOCKEDOR64
-          fi
-          $MAKE $MAKEOPT
-
-      - name: Install OpenSSL
-        if: env.build_ssl == 'true' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          cd "$OPENSSL_SOURCE_PATH"
-          # install_sw saves us ages processing man pages :-)
-          $MAKE install_sw
-
-      - name: Run OpenSSL
-        if: env.build_ssl == 'true'
-        run: |
-          "${OPENSSL_INSTALL_PATH}/bin/openssl" version
-          file "${OPENSSL_INSTALL_PATH}/bin/openssl"
-
-      - name: Get latest stable Python source
-        if: steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          mkdir -vp "${GITHUB_WORKSPACE}/src"
-          cd "${GITHUB_WORKSPACE}/src"
-          git clone https://github.com/python/cpython.git
-          cd "${PYTHON_SOURCE_PATH}"
-          export LATEST_STABLE_TAG=$(git tag --list | grep -v a | grep -v rc | grep -v b | sort -Vr | head -n1)
-          git checkout "${LATEST_STABLE_TAG}"
-          # Temp Python 3.14 patch to work with OpenSSL 4
-          # Python 3.15 in Oct 2026 should support 4 OOB
-          patch -p1 < "${GITHUB_WORKSPACE}/py314-ossl4.diff"
-          export COMPILED_PYTHON_VERSION=${LATEST_STABLE_TAG:1} # Trim the "v" prefix
-          echo "COMPILED_PYTHON_VERSION=${COMPILED_PYTHON_VERSION}" >> $GITHUB_ENV
-
-      - name: Mac/Linux Configure Python
-        if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          cd "${PYTHON_SOURCE_PATH}"
-          ./configure --with-openssl="${OPENSSL_INSTALL_PATH}" \
-                      --prefix="${PYTHON_INSTALL_PATH}" \
-                      --enable-shared \
-                      --with-ensurepip=upgrade \
-                      --enable-optimizations \
-                      --with-lto
-
-      - name: Windows Get External Python deps
-        if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          cd "${env:PYTHON_SOURCE_PATH}"
-          PCBuild\get_externals.bat
-
-      - name: Windows overwrite external OpenSSL with local
-        if: env.build_ssl == 'true' && runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          cd "${env:PYTHON_SOURCE_PATH}"
-          $env:OPENSSL_EXT_PATH = "$(Get-Item externals\openssl-bin-* | Select -exp FullName)\"
-          echo "External OpenSSL was downloaded to ${env:OPENSSL_EXT_PATH}"
-          Remove-Item -recurse -force "${env:OPENSSL_EXT_PATH}*"
-          # Emulate what this script does:
-          # https://github.com/python/cpython/blob/main/PCbuild/openssl.vcxproj
-          if (${env:RUNNER_ARCH} -eq "X64") {
-            $env:ossl_path = "amd64"
-          } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
-            $env:ossl_path =  "arm64"
-          }
-          $env:OPENSSL_EXT_TARGET_PATH = "${env:OPENSSL_EXT_PATH}${env:ossl_path}"
-          echo "Copying our OpenSSL to ${env:OPENSSL_EXT_TARGET_PATH}"
-          mkdir "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
-          Copy-Item -Path "${env:OPENSSL_SOURCE_PATH}\LICENSE.txt" -Destination "${env:OPENSSL_EXT_TARGET_PATH}\LICENSE"
-          cp -v "$env:OPENSSL_INSTALL_PATH\lib\*" "${env:OPENSSL_EXT_TARGET_PATH}"
-          cp -v "$env:OPENSSL_INSTALL_PATH\bin\*" "${env:OPENSSL_EXT_TARGET_PATH}"
-          cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\*" "${env:OPENSSL_EXT_TARGET_PATH}\include\openssl\"
-          cp -v "$env:OPENSSL_INSTALL_PATH\include\openssl\applink.c" "${env:OPENSSL_EXT_TARGET_PATH}\include\"
-          # We need our custom openssl.props which uses OpenSSL 3 DLL names
-          Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\ -Verbose
-
-      - name: Windows Install sphinx-build
-        if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          pip install --upgrade pip
-          pip install --upgrade sphinx
-          sphinx-build --version
-
-      - name: Windows Config/Build/Install Python
-        if: runner.os == 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          cd "${env:PYTHON_SOURCE_PATH}"
-          # We need our custom openssl.props which uses OpenSSL 3 DLL names
-          Copy-Item -Path "${env:GITHUB_WORKSPACE}\openssl.props" -Destination PCBuild\ -Verbose
-          if (${env:RUNNER_ARCH} -eq "X64") {
-            $env:arch = "x64"
-          } elseif (${env:RUNNER_ARCH} -eq "ARM64") {
-            $env:arch = "ARM64"
-          }
-          PCBuild\build.bat -c Release -p $env:arch --pgo
-          .\python.bat PC\layout --precompile --preset-default --copy $env:PS_PYTHON_INSTALL_PATH
-          Get-ChildItem -Path $env:PS_PYTHON_INSTALL_PATH -File
-
-      - name: Mac/Linux Build Python
-        if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          cd "${PYTHON_SOURCE_PATH}"
-          echo "Running: ${MAKE} ${MAKEOPT}"
-          $MAKE $MAKEOPT
-
-      - name: Mac/Linux Install Python
-        if: runner.os != 'Windows' && steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          cd "${PYTHON_SOURCE_PATH}"
-          $MAKE altinstall
-          $MAKE bininstall
 
       - name: Run Python
         run: |
@@ -438,11 +225,6 @@ jobs:
           name: chrome-bisect-${{ matrix.jid }}
           path: |
             ${{ steps.package-binaries.outputs.archivefile }}
-
-      - name: Tar Cache archive
-        if: steps.cache-python-ssl.outputs.cache-hit != 'true'
-        run: |
-          tar cJvvf bin.tar.xz bin/
 
   publish:
     if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
