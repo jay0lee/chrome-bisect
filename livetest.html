@@ -32,13 +32,8 @@
       transition: background-color 0.15s ease-out;
     }
 
-    body.pass {
-      background-color: var(--bg-pass);
-    }
-
-    body.fail {
-      background-color: var(--bg-fail);
-    }
+    body.pass { background-color: var(--bg-pass); }
+    body.fail { background-color: var(--bg-fail); }
 
     .container {
       width: 100%;
@@ -138,7 +133,7 @@
     }
   </style>
 </head>
-<body id="page-body">
+<body>
 
   <div class="container">
     <span class="badge" id="test-name">API Deprecation Check</span>
@@ -156,7 +151,7 @@
       </div>
       <div class="panel-row">
         <span class="panel-label">Evaluation Mode</span>
-        <span class="panel-value" id="eval-mode">Synchronous IDL</span>
+        <span class="panel-value">Synchronous IDL</span>
       </div>
     </div>
 
@@ -165,5 +160,45 @@
   </div>
 
   <script>
-    // --- 1. EVALUATION LOGIC ---
-    // Target: GPUAdapter.prototype.isFallbackAdapter (removed in Chrome 14
+    (function () {
+      const headline = document.getElementById('headline');
+      const summary = document.getElementById('summary');
+      const guidance = document.getElementById('guidance');
+      const tag = document.getElementById('automation-tag');
+
+      // Prevents `grep` matching string literals inside the script block during --dump-dom
+      const tokenGood = ['BISECT', 'PASS'].join('_');
+      const tokenBad  = ['BISECT', 'FAIL'].join('_');
+
+      try {
+        const isGood = typeof GPUAdapter !== 'undefined' &&
+                       Boolean(GPUAdapter.prototype) &&
+                       'isFallbackAdapter' in GPUAdapter.prototype;
+
+        const activeToken = isGood ? tokenGood : tokenBad;
+        document.body.setAttribute('data-bisect-status', activeToken);
+        if (tag) tag.textContent = activeToken;
+
+        if (isGood) {
+          document.body.className = 'pass';
+          if (headline) headline.textContent = 'PASS: API Present';
+          if (summary) summary.textContent = 'The browser supports the legacy isFallbackAdapter property.';
+          if (guidance) guidance.innerHTML = 'This build reflects <code>Chrome &lt; 140</code> behavior. The property is accessible directly on the adapter prototype.';
+        } else {
+          document.body.className = 'fail';
+          if (headline) headline.textContent = 'FAIL: API Removed';
+          if (summary) summary.textContent = 'The legacy isFallbackAdapter property is missing.';
+          if (guidance) guidance.innerHTML = 'This build reflects <code>Chrome 140+</code> behavior. The property was removed; modernize code to check <code>adapter.info.isFallbackAdapter</code>.';
+        }
+      } catch (err) {
+        document.body.className = 'fail';
+        document.body.setAttribute('data-bisect-status', tokenBad);
+        if (tag) tag.textContent = tokenBad;
+        if (headline) headline.textContent = 'ERROR';
+        if (summary) summary.textContent = err.name + ': ' + err.message;
+        if (guidance) guidance.textContent = 'An unexpected script exception occurred during execution.';
+      }
+    })();
+  </script>
+</body>
+</html>
