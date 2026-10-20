@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bisect Test</title>
+</head>
+<body>
+  <div id="result">INITIAL</div>
+  <script>
+    // GPUAdapter.prototype.isFallbackAdapter was removed in Chrome 140
+    const hasLegacy = typeof GPUAdapter !== 'undefined' && 'isFallbackAdapter' in GPUAdapter.prototype;
+
+    // String concatenation prevents grep from matching inside the <script> body in --dump-dom
+    if (hasLegacy) {
+      document.getElementById('result').textContent = 'BISECT_' + 'PASS';
+    } else {
+      document.getElementById('result').textContent = 'BISECT_' + 'FAIL';
+    }
+  </script>
+</body>
+</html>
