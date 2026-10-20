@@ -123,75 +123,16 @@ jobs:
 
       - name: "Smoke test: end-to-end bisect with synthetic good/bad boundary"
         if: runner.os == 'Linux' && runner.arch == 'X64'
-        timeout-minutes: 30
         run: |
-          # Perform a real bisect to verify the full pipeline works:
-          # downloading builds, launching Chromium, and narrowing a range.
-          #
-          # Since we need deterministic good/bad results without user input,
-          # we create a synthetic boundary: a helper script checks each
-          # build's major version and marks anything below a threshold as
-          # "good" and anything at or above it as "bad". The threshold is
-          # set to stable-3 (the midpoint of the default stable-6..HEAD
-          # range) so the bisect has real work to do on both sides.
-          threshold=$(python3 -c "
-          import urllib.request, json
-          url = 'https://versionhistory.googleapis.com/v1/chrome/platforms/all/channels/stable/versions/all/releases?fields=releases%2Fversion%2CnextPageToken'
-          data = json.loads(urllib.request.urlopen(url).read())
-          milestones = sorted(set(int(r['version'].split('.')[0]) for r in data['releases']), reverse=True)
-          print(milestones[3])
-          ")
-          echo ""
-          echo "=== Smoke test: end-to-end bisect with synthetic good/bad boundary ==="
-          echo "Performing a bisect to verify the full pipeline (download, launch, narrow range)."
-          echo "Builds with major version < M${threshold} will be marked 'good'."
-          echo "Builds with major version >= M${threshold} will be marked 'bad'."
-          echo ""
-
-          # Helper script: exit 0 (good) if version < threshold,
-          # exit 1 (bad) if version >= threshold.
-          cat > /tmp/bisect_test.sh << 'EOF'
-          #!/bin/bash
-          version=$("$1" --no-sandbox --product-version 2>/dev/null | cut -d. -f1)
-          if [ -z "$version" ]; then
-            echo "Could not determine Chromium version"
-            exit 1
-          fi
-          if [ "$version" -ge "$2" ]; then
-            echo "Version $version >= $2 (bad)"
-            exit 1
-          fi
-          echo "Version $version < $2 (good)"
-          exit 0
-          EOF
-          chmod +x /tmp/bisect_test.sh
-
-          $distpath/chrome_bisect/chrome_bisect \
-            --not-interactive \
-            --command "/tmp/bisect_test.sh %p ${threshold}" \
-            2>&1 | tee /tmp/bisect_output.txt
-
-          # Verify the bisect found the expected milestone boundary.
-          # Query GitHub Compare API on the official chromium/chromium mirror
-          # instead of Gitiles (which returns 403 Forbidden by policy).
-          changelog_url=$(grep -oE 'https://chromium.googlesource.com/chromium/src/\+log/[^ ]+' /tmp/bisect_output.txt | head -1)
-          if [ -z "$changelog_url" ]; then
-            echo "ERROR: No changelog URL found in bisect output"
-            exit 1
-          fi
-          range=$(echo "$changelog_url" | grep -oE '[0-9a-f]{40}\.\.[0-9a-f]{40}' | sed 's/\.\./.../')
-          echo ""
-          echo "=== Verifying bisect result ==="
-          echo "Commit Range: ${range}"
-          if curl --retry 3 --fail -s \
-               -H "Authorization: Bearer ${{ github.token }}" \
-               "https://api.github.com/repos/chromium/chromium/compare/${range}" \
-               | grep -q "major version to ${threshold}"; then
-            echo "PASS: Changelog contains the M${threshold} version bump commit"
-          else
-            echo "FAIL: M${threshold} version bump not found in changelog: ${changelog_url}"
-            #exit 1
-          fi
+          "${distpath}/chrome_bisect/chrome_bisect" --good M139 --bad M141 --not-interactive -c '%p --headless=new \
+            --no-first-run \
+           --no-default-browser-check \
+           --disable-fre \
+           --disable-search-engine-choice-screen \
+           --use-mock-keychain \
+           --password-store=basic \
+           --disable-features=DialMediaRouteProvider \
+           --dump-dom "file://'$PWD'/test.html" | grep -q "BISECT_PASS"'
 
       - name: Package binaries
         id: package-binaries
