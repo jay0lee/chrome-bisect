@@ -44,7 +44,7 @@ We have a [sample test page](https://jay0lee.github.io/chrome-bisect/test.html) 
 1. Run Chrome Bisect, telling it that Chrome 139 was good and 141 is bad:
 
 ```
-chrome_bisect --good 139 --bad 141 -- --no-first-run --password-store=basic https://jay0lee.github.io/chrome-bisect/test.html
+chrome_bisect --good 139 --bad 141 -- --no-first-run --use-mock-keychain --password-store=basic https://jay0lee.github.io/chrome-bisect/test.html
 ```
 
 2. The tool will start downloading Chromium builds for you to test. For each build:
@@ -63,7 +63,7 @@ This is the core value of Chrome Bisect — instead of guessing which of the tho
   </summary>
 
 ```
-$ ./chrome_bisect --good 139 --bad 141 -- --no-first-run --password-store=basic https://jay0lee.github.io/chrome-bisect/test.html
+$ ./chrome_bisect --good 139 --bad 141 -- --no-first-run --use-mock-keychain --password-store=basic https://jay0lee.github.io/chrome-bisect/test.html
 Interpreting "139" as Chrome milestone M139 (use a commit position > 999 for raw revisions)
 Resolved M139 to commit position 1477651 (via chromiumdash bulk milestones)
 Interpreting "141" as Chrome milestone M141 (use a commit position > 999 for raw revisions)
