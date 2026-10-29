@@ -170,10 +170,34 @@
       var tokenGood = 'BISECT' + '_' + 'PASS';
       var tokenBad  = 'BISECT' + '_' + 'FAIL';
 
-      // Extract a short browser version from the user agent string.
+      // Attempt to get the real full version via User-Agent Client Hints
+      // (the reduced UA string freezes minor/build/patch to 0.0.0).
+      function updateVersion() {
+        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+          navigator.userAgentData.getHighEntropyValues(['fullVersionList'])
+            .then(function (ua) {
+              var found = null;
+              var list = ua.fullVersionList || [];
+              for (var i = 0; i < list.length; i++) {
+                var brand = list[i].brand;
+                if (brand === 'Chromium' || brand === 'Google Chrome') {
+                  found = list[i];
+                  break;
+                }
+              }
+              if (found) {
+                browserVersion.textContent = found.brand + ' ' + found.version;
+              }
+            })
+            .catch(function () { /* keep fallback */ });
+        }
+      }
+
+      // Fallback: use the UA string (may show 0.0.0 for minor/build/patch).
       var ua = navigator.userAgent || '';
       var chromeMatch = ua.match(/Chrom(?:e|ium)\/([0-9.]+)/);
       browserVersion.textContent = chromeMatch ? chromeMatch[1] : ua.substring(0, 60);
+      updateVersion();
 
       try {
         var apiExists = typeof GPUAdapter !== 'undefined' &&
