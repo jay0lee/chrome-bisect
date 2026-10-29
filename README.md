@@ -44,8 +44,25 @@ We have a [sample test page](https://jay0lee.github.io/chrome-bisect/test.html) 
 1. Run Chrome Bisect, telling it that Chrome 139 was good and 141 is bad:
 
 ```
-chrome_bisect --good 139 --bad 141 -- --no-first-run --use-mock-keychain --password-store=basic https://jay0lee.github.io/chrome-bisect/test.html
+chrome_bisect \
+  --good 139 \
+  --bad 141 \
+  -- \
+  --no-first-run \
+  --use-mock-keychain \
+  --password-store=basic \
+  https://jay0lee.github.io/chrome-bisect/test.html
 ```
+
+   | Argument | Purpose |
+   |----------|---------|
+   | `--good 139` | The last milestone where the page worked (Chrome 139). |
+   | `--bad 141` | A milestone where the page is broken (Chrome 141). |
+   | `--` | Separator — everything after this is passed to Chromium. |
+   | `--no-first-run` | Skips the "Welcome to Chromium" first-run dialog. |
+   | `--use-mock-keychain` | Prevents the macOS Keychain access prompt. |
+   | `--password-store=basic` | Uses plain-text credential storage instead of the OS keychain (Linux). |
+   | URL | The test page Chromium will open on each launch. |
 
 2. The tool will start downloading Chromium builds for you to test. For each build:
    * If the page shows a green **GOOD** screen — exit Chromium and mark the version as **g** (good).
