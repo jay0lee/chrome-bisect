@@ -99,6 +99,9 @@
     .panel-value {
       font-weight: 600;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      text-align: right;
+      max-width: 65%;
+      word-break: break-all;
     }
 
     .status-icon {
@@ -142,8 +145,8 @@
         <span class="panel-value" id="api-status">…</span>
       </div>
       <div class="panel-row">
-        <span class="panel-label">Removed in</span>
-        <span class="panel-value">Chrome 140</span>
+        <span class="panel-label">Browser</span>
+        <span class="panel-value" id="browser-version">…</span>
       </div>
     </div>
 
@@ -160,11 +163,17 @@
       var guidance = document.getElementById('guidance');
       var status   = document.getElementById('api-status');
       var ciResult = document.getElementById('ci-result');
+      var browserVersion = document.getElementById('browser-version');
 
       // String concatenation prevents grep from matching inside the
       // <script> body when using --dump-dom in CI/CD.
       var tokenGood = 'BISECT' + '_' + 'PASS';
       var tokenBad  = 'BISECT' + '_' + 'FAIL';
+
+      // Extract a short browser version from the user agent string.
+      var ua = navigator.userAgent || '';
+      var chromeMatch = ua.match(/Chrom(?:e|ium)\/([0-9.]+)/);
+      browserVersion.textContent = chromeMatch ? chromeMatch[1] : ua.substring(0, 60);
 
       try {
         var apiExists = typeof GPUAdapter !== 'undefined' &&
@@ -175,20 +184,20 @@
           document.body.className = 'good';
           ciResult.textContent = tokenGood;
           headline.textContent = 'GOOD';
-          summary.textContent  = 'isFallbackAdapter API exists in this build.';
+          summary.textContent  = 'The API is available in this build.';
           status.innerHTML     = '<span class="status-icon">✅</span> Present';
           guidance.innerHTML   =
-            'This build is <strong>older than Chrome 140</strong>. ' +
-            'The legacy <code>isFallbackAdapter</code> property is still on the adapter prototype.';
+            'Exit this browser and mark the build as ' +
+            '<strong>g</strong> (good) in Chrome Bisect.';
         } else {
           document.body.className = 'bad';
           ciResult.textContent = tokenBad;
           headline.textContent = 'BAD';
-          summary.textContent  = 'isFallbackAdapter API does not exist in this build.';
-          status.innerHTML     = '<span class="status-icon">❌</span> Removed';
+          summary.textContent  = 'The API is not available in this build.';
+          status.innerHTML     = '<span class="status-icon">❌</span> Not available';
           guidance.innerHTML   =
-            'This build is <strong>Chrome 140 or newer</strong>. ' +
-            'The property was removed; use <code>adapter.info.isFallbackAdapter</code> instead.';
+            'Exit this browser and mark the build as ' +
+            '<strong>b</strong> (bad) in Chrome Bisect.';
         }
       } catch (err) {
         document.body.className = 'bad';

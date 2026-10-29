@@ -37,28 +37,69 @@ chrome_bisect --good M85 --bad M90 -- https://www.google.com/
 
 # An example Chrome Bisect
 
-Imagine you maintain a web app that uses the `GPUAdapter.prototype.isFallbackAdapter` property to detect whether a user's GPU adapter is a software fallback. Everything works fine until users start reporting that after upgrading to **Chrome 140** the page breaks — the property is suddenly `undefined`. You know the site worked in Chrome 139 but you're not sure exactly *when* or *why* the behavior changed. Let's run a bisect to find out.
+Imagine you maintain a web app that relies on certain Chrome GPU APIs. After users upgrade to a recent Chrome release, they start reporting that the page no longer works correctly. You know the site was fine a couple of milestones ago but you have no idea which of the thousands of changes between releases caused the breakage. Let's run a bisect to find out.
+
+We have a [sample test page](https://jay0lee.github.io/chrome-bisect/test.html) that checks for a specific GPU API and shows a clear green **GOOD** or red **BAD** result. The API was available in Chrome 139 but removed in a later release — a perfect target for bisection.
 
 1. Run Chrome Bisect, telling it that Chrome 139 was good and 141 is bad:
 
 ```
-chrome_bisect --good 139 --bad 141 -- https://jay0lee.github.io/chrome-bisect/test.html
+chrome_bisect --good 139 --bad 141 -- --no-first-run --password-store=basic https://jay0lee.github.io/chrome-bisect/test.html
 ```
 
-   The [test page](https://jay0lee.github.io/chrome-bisect/test.html) will automatically check for the API and display a clear result.
-
 2. The tool will start downloading Chromium builds for you to test. For each build:
-   * If the page shows a green **GOOD** screen — the API still exists. Exit Chromium and mark the version as **g** (good).
-   * If the page shows a red **BAD** screen — the API is gone. Exit Chromium and mark the version as **b** (bad).
+   * If the page shows a green **GOOD** screen — exit Chromium and mark the version as **g** (good).
+   * If the page shows a red **BAD** screen — exit Chromium and mark the version as **b** (bad).
 
-3. Keep testing builds until the tool narrows the range down to the exact commits where the change happened. It will then give you a changelog URL showing every commit between the last good and first bad build.
+3. Keep testing builds (about a dozen) until the tool narrows the range down to the exact commits where the change happened. It will then give you a changelog URL showing every commit between the last good and first bad build.
 
-4. Open the changelog and look through the list — you'll find the commit that removed `isFallbackAdapter` from the prototype. From there you can see:
-   * **What changed:** The property was moved from the adapter prototype to `adapter.info.isFallbackAdapter`.
-   * **Why it changed:** The old location was deprecated as part of a WebGPU spec update.
-   * **How to fix your site:** Update your code to read `adapter.info.isFallbackAdapter` instead.
+4. Open the changelog and look through the list of commits. Can you find the one that caused the behavior change? What was the reason for the change? Is there something you can update on your site to fix it?
 
 This is the core value of Chrome Bisect — instead of guessing which of the thousands of changes between two Chrome releases broke your site, you get pointed to the exact commit and can understand the reasoning behind the change.
+
+<details>
+  <summary>
+    Hint: example bisect output (click to expand)
+  </summary>
+
+```
+$ ./chrome_bisect --good 139 --bad 141 -- --no-first-run --password-store=basic https://jay0lee.github.io/chrome-bisect/test.html
+Interpreting "139" as Chrome milestone M139 (use a commit position > 999 for raw revisions)
+Resolved M139 to commit position 1477651 (via chromiumdash bulk milestones)
+Interpreting "141" as Chrome milestone M141 (use a commit position > 999 for raw revisions)
+Resolved M141 to commit position 1509326 (via chromiumdash bulk milestones)
+running bisect-builds.py with options: --bad 1509326 --verify-range --use-local-cache --archive mac-arm --good 1477651 -- https://jay0lee.github.io/chrome-bisect/test.html --enable-chrome-browser-cloud-management
+Downloading list of known revisions. If the range is large, this can take several minutes...
+
+Saved revisions 1477660-1509324 to .bisect-builds-cache.json
+Downloading revision 1509324...
+Trying revision 1509324...
+Revision 1509324 is [(g)ood/(b)ad/(r)etry/(u)nknown/(s)tdout/(q)uit]: b
+Downloading revision 1477660...
+Trying revision 1477660...
+Revision 1477660 is [(g)ood/(b)ad/(r)etry/(u)nknown/(s)tdout/(q)uit]: g
+
+...after about a dozen builds...
+
+You are probably looking for a change made after 1477789 (known good),
+but no later than 1477813 (first known bad).
+CHANGELOG URL:
+https://chromium.googlesource.com/chromium/src/+log/63deaf0e80fe04d998c8e9ae0d5155740f5b8f0f..39ad022deafaef7a4d40b00b85997e97b19230b6
+```
+
+</details>
+
+<details>
+  <summary>
+    Hint: the changelog URL from the bisect (click to expand)
+  </summary>
+
+Open the changelog URL from the bisect output:
+https://chromium.googlesource.com/chromium/src/+log/63deaf0e80fe04d998c8e9ae0d5155740f5b8f0f..39ad022deafaef7a4d40b00b85997e97b19230b6
+
+Look through the list of commits. Can you spot which change affected GPU APIs?
+
+</details>
 
 # Known Limitations
 As mentioned above, Chrome Bisect has a few limitations that you should be aware of:
