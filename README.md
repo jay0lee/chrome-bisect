@@ -60,8 +60,6 @@ chrome_bisect --good 139 --bad 141 -- https://jay0lee.github.io/chrome-bisect/te
 
 This is the core value of Chrome Bisect — instead of guessing which of the thousands of changes between two Chrome releases broke your site, you get pointed to the exact commit and can understand the reasoning behind the change.
 
-> **Tip:** You can pass bare milestone numbers (`139`) instead of the `M139` prefix — Chrome Bisect recognises them automatically.
-
 # Known Limitations
 As mentioned above, Chrome Bisect has a few limitations that you should be aware of:
 * Chrome Bisect downloads public Chromium browser binaries to test with, these open-source public builds do not contain everything the official Chrome browser contains and may not be good for testing issues related to:
