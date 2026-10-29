@@ -400,6 +400,7 @@ def add_default_chrome_args(args):
     '''Sets appropriate arguments that bisect-builds.py will pass to Chromium binaries.'''
 
     args.append('--enable-chrome-browser-cloud-management')
+    args.append('--password-store=basic')
     return args
 
 
