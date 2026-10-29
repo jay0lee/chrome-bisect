@@ -37,23 +37,30 @@ chrome_bisect --good M85 --bad M90 -- https://www.google.com/
 
 # An example Chrome Bisect
 
-The [test page](https://jay0lee.github.io/chrome-bisect/test.html) checks whether the `GPUAdapter.prototype.isFallbackAdapter` API is present. This property was removed in Chrome 140, making it an easy target for bisection: builds **before** 140 show a green **GOOD** page, builds **at or after** 140 show a red **BAD** page.
+Imagine you maintain a web app that uses the `GPUAdapter.prototype.isFallbackAdapter` property to detect whether a user's GPU adapter is a software fallback. Everything works fine until users start reporting that after upgrading to **Chrome 140** the page breaks — the property is suddenly `undefined`. You know the site worked in Chrome 139 but you're not sure exactly *when* or *why* the behavior changed. Let's run a bisect to find out.
 
-1. Run Chrome Bisect:
+1. Run Chrome Bisect, telling it that Chrome 139 was good and 141 is bad:
 
 ```
 chrome_bisect --good 139 --bad 141 -- https://jay0lee.github.io/chrome-bisect/test.html
 ```
 
-2. The tool will start downloading Chromium builds. For each build:
-   * If the page turns **green** and says **GOOD** — the API still exists. Exit Chromium and mark the version as **g** (good).
-   * If the page turns **red** and says **BAD** — the API has been removed. Exit Chromium and mark the version as **b** (bad).
+   The [test page](https://jay0lee.github.io/chrome-bisect/test.html) will automatically check for the API and display a clear result.
 
-3. After about a dozen builds the tool will narrow the range to the exact commits where the removal happened and give you a changelog URL.
+2. The tool will start downloading Chromium builds for you to test. For each build:
+   * If the page shows a green **GOOD** screen — the API still exists. Exit Chromium and mark the version as **g** (good).
+   * If the page shows a red **BAD** screen — the API is gone. Exit Chromium and mark the version as **b** (bad).
 
-4. Open the changelog and look for the commit that removed `isFallbackAdapter` — this tells you exactly *why* the change was made and what the replacement API is (`adapter.info.isFallbackAdapter`).
+3. Keep testing builds until the tool narrows the range down to the exact commits where the change happened. It will then give you a changelog URL showing every commit between the last good and first bad build.
 
-> **Tip:** You can also pass bare milestone numbers (`139`) instead of the `M139` prefix — Chrome Bisect will recognise them automatically.
+4. Open the changelog and look through the list — you'll find the commit that removed `isFallbackAdapter` from the prototype. From there you can see:
+   * **What changed:** The property was moved from the adapter prototype to `adapter.info.isFallbackAdapter`.
+   * **Why it changed:** The old location was deprecated as part of a WebGPU spec update.
+   * **How to fix your site:** Update your code to read `adapter.info.isFallbackAdapter` instead.
+
+This is the core value of Chrome Bisect — instead of guessing which of the thousands of changes between two Chrome releases broke your site, you get pointed to the exact commit and can understand the reasoning behind the change.
+
+> **Tip:** You can pass bare milestone numbers (`139`) instead of the `M139` prefix — Chrome Bisect recognises them automatically.
 
 # Known Limitations
 As mentioned above, Chrome Bisect has a few limitations that you should be aware of:
