@@ -186,7 +186,7 @@
                 }
               }
               if (found) {
-                browserVersion.textContent = found.brand + ' ' + found.version;
+                browserVersion.textContent = 'Chrome ' + found.version;
               }
             })
             .catch(function () { /* keep fallback */ });
@@ -196,7 +196,7 @@
       // Fallback: use the UA string (may show 0.0.0 for minor/build/patch).
       var ua = navigator.userAgent || '';
       var chromeMatch = ua.match(/Chrom(?:e|ium)\/([0-9.]+)/);
-      browserVersion.textContent = chromeMatch ? chromeMatch[1] : ua.substring(0, 60);
+      browserVersion.textContent = chromeMatch ? 'Chrome ' + chromeMatch[1] : ua.substring(0, 60);
       updateVersion();
 
       try {
