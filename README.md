@@ -39,7 +39,7 @@ chrome_bisect --good M85 --bad M90 -- https://www.google.com/
 
 Imagine you maintain a web app that relies on certain Chrome GPU APIs. After users upgrade to a recent Chrome release, they start reporting that the page no longer works correctly. You know the site was fine a couple of milestones ago but you have no idea which of the thousands of changes between releases caused the breakage. Let's run a bisect to find out.
 
-We have a [sample test page](https://jay0lee.github.io/chrome-bisect/test.html) that checks for a specific GPU API and shows a clear green **GOOD** or red **BAD** result. The API was available in Chrome 139 but removed in a later release — a perfect target for bisection.
+We have a [sample test page](https://jay0lee.github.io/chrome-bisect/test.html) that checks for a specific GPU API and shows a clear green **GOOD** or red **BAD** result.
 
 1. Run Chrome Bisect, telling it that Chrome 139 was good and 141 is bad:
 
@@ -53,7 +53,7 @@ chrome_bisect --good 139 --bad 141 -- --no-first-run --use-mock-keychain --passw
 
 3. Keep testing builds (about a dozen) until the tool narrows the range down to the exact commits where the change happened. It will then give you a changelog URL showing every commit between the last good and first bad build.
 
-4. Open the changelog and look through the list of commits. Can you find the one that caused the behavior change? What was the reason for the change? Is there something you can update on your site to fix it?
+4. Open the changelog and look through the list of commits. Can you find the one that caused the behavior change? (Hint: search the changelog for "GPU".) What was the reason for the change? Is there something you can update on your site to fix it?
 
 This is the core value of Chrome Bisect — instead of guessing which of the thousands of changes between two Chrome releases broke your site, you get pointed to the exact commit and can understand the reasoning behind the change.
 
