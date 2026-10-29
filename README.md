@@ -121,8 +121,7 @@ Look through the list of commits. Can you spot which change affected GPU APIs?
 # Known Limitations
 As mentioned above, Chrome Bisect has a few limitations that you should be aware of:
 * Chrome Bisect downloads public Chromium browser binaries to test with, these open-source public builds do not contain everything the official Chrome browser contains and may not be good for testing issues related to:
-     * The PDF Viewer
-     * Widevine DRM
+     * Widevine DRM (the proprietary CDM is not included in Chromium builds, so DRM-protected content like Netflix will not play)
 * If you have an issue on Chrome OS try reproducing it in Chrome browser on Windows, Mac or Linux and see if you can utilize the tool there. The tool does support `--archive chromeos` on Linux which runs like Chrome OS but is not really full Chrome OS, your mileage may vary.
 * The script now has limited support for enterprise policies including Chrome Enterprise Core / Premium.
   * To enroll in Chrome Enterprise Core / CBCM you need to set an enrollment token. The process is identical to official Chrome on Windows / MacOS. On Linux the file to store the token in should be `/etc/chromium/policies/enrollment/CloudManagementEnrollmentToken`.
